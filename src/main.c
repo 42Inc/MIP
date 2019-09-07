@@ -12,7 +12,7 @@
 int main(int argc, char **argv) {
   char *method = argv[1];
   char *code = argv[2];
-  int exitcode = -1;
+  int exit_code = -1;
   if (argc > 1) {
     if (!strcmp(method, "coder")) {
       /*Coder*/
@@ -20,11 +20,11 @@ int main(int argc, char **argv) {
         fprintf(stderr, "Parameter not found! [coder]\n");
         return helper();
       }
-      if ((exitcode = coder(atoi(code))) == 255) {
+      if ((exit_code = coder(atoi(code))) == 255) {
         fprintf(stderr, "Code invalid [coder]\n");
         return helper();
       } else {
-        return exitcode;
+        return exit_code;
       }
     } else if (!strcmp(method, "decoder")) {
       /*Decoder*/
@@ -32,11 +32,11 @@ int main(int argc, char **argv) {
         fprintf(stderr, "Parameter not found! [decoder]\n");
         return helper();
       }
-      if ((exitcode = decoder(atoi(code))) == 255) {
+      if ((exit_code = decoder(atoi(code))) == 255) {
         fprintf(stderr, "Code invalid [decoder]\n");
         return helper();
       } else {
-        return exitcode;
+        return exit_code;
       }
     }
   }
@@ -45,8 +45,8 @@ int main(int argc, char **argv) {
 /*----------------------------------------------------------------------------*/
 int helper() {
   fprintf(stderr, "Usage:\n");
-  fprintf(stderr, "  mip coder\n");
-  fprintf(stderr, "  mip decoder\n");
+  fprintf(stderr, "  mip coder <CODE>\n");
+  fprintf(stderr, "  mip decoder <CODE>\n");
   return 0;
 }
 /*----------------------------------------------------------------------------*/

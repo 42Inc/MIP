@@ -1,9 +1,6 @@
 #ifndef MIP_CODER_H
 #define MIP_CODER_H
 /*Include Headers-------------------------------------------------------------*/
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 /*Include user-defined headers------------------------------------------------*/
 #include <MIP_helper.h>

@@ -11,10 +11,17 @@
 /*Functios--------------------------------------------------------------------*/
 int decoder(int code) {
   switch (code) {
-    case 1: return fi0_decoder(); break;
-    case 2: return fi1_decoder(); break;
-    case 3: return fi2_decoder(); break;
-    default: return 255;
+  case 1:
+    return fi0_decoder();
+    break;
+  case 2:
+    return fi1_decoder();
+    break;
+  case 3:
+    return fi2_decoder();
+    break;
+  default:
+    return 255;
   }
 }
 /*----------------------------------------------------------------------------*/

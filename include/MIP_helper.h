@@ -1,6 +1,8 @@
 #ifndef MIP_HELPER_H
 #define MIP_HELPER_H
 /*Include Headers-------------------------------------------------------------*/
+#include <fcntl.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

@@ -14,5 +14,6 @@ int coder(int code);
 int fi0_coder();
 int fi1_coder();
 int fi2_coder();
+unsigned int get_binary_lenght(unsigned int num);
 /*----------------------------------------------------------------------------*/
 #endif

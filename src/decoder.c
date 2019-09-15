@@ -29,7 +29,7 @@ int decoder(int code) {
 int fi0_decoder() {
   char c = 0;
   int return_code = 0;
-  int write_num = 0;
+  unsigned int write_num = 0;
   char *out_filename = filename ? filename : "a.decode";
   FILE *out_fd = NULL;
   int i = 0;
@@ -46,8 +46,8 @@ int fi0_decoder() {
         if ((c & 0x80) == 0) {
           write_num++;
         } else {
-          fprintf(stderr, "Write num - %d [decoder]\n", write_num);
-          fprintf(out_fd, "%d ", write_num);
+          fprintf(stderr, "Write num - %u [decoder]\n", write_num);
+          fprintf(out_fd, "%u ", write_num);
           write_num = 0;
         }
         c = c << 1;

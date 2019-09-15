@@ -29,7 +29,7 @@ int coder(int code) {
 int fi0_coder() {
   char c = 0;
   int read_num = 0;
-  int number = 0;
+  unsigned int number = 0;
   int index = 0;
   int return_code = 0;
   char *out_filename = filename ? filename : "a.code";
@@ -54,7 +54,7 @@ int fi0_coder() {
       ++index;
     } else {
       if (read_num) {
-        fprintf(stderr, "Read num - %d [coder]\n", number);
+        fprintf(stderr, "Read num - %u [coder]\n", number);
       /* Put coder process here */
       label_write_byte:
         if (full_byte_flag) {
@@ -106,7 +106,8 @@ int fi0_coder() {
 int fi1_coder() {
   char c = 0;
   int read_num = 0;
-  int number = 0;
+  unsigned int number = 0;
+  unsigned int binary_lenght = 0;
   int index = 0;
   int return_code = 0;
   char *out_filename = filename ? filename : "a.code";
@@ -123,7 +124,8 @@ int fi1_coder() {
       ++index;
     } else {
       if (read_num) {
-	fprintf(stderr, "Read num - %d [coder]\n", number);
+        binary_lenght = get_binary_lenght(number);
+        fprintf(stderr, "Read num - %u [%u] [coder]\n", number, binary_lenght);
         read_num = 0;
         number = 0;
         index = 0;
@@ -136,7 +138,7 @@ int fi1_coder() {
 int fi2_coder() {
   char c = 0;
   int read_num = 0;
-  int number = 0;
+  unsigned int number = 0;
   int index = 0;
   int return_code = 0;
   char *out_filename = filename ? filename : "a.code";
@@ -153,7 +155,7 @@ int fi2_coder() {
       ++index;
     } else {
       if (read_num) {
-        fprintf(stderr, "Read num - %d [coder]\n", number);
+        fprintf(stderr, "Read num - %u [coder]\n", number);
         read_num = 0;
         number = 0;
         index = 0;
@@ -161,5 +163,16 @@ int fi2_coder() {
     }
   } while (return_code != 0);
   return 0;
+}
+/*----------------------------------------------------------------------------*/
+unsigned int get_binary_lenght(unsigned int num) {
+  unsigned int result = 0;
+  if (num == 0)
+    return result;
+  while (num > 0) {
+    num = num >> 1;
+    ++result;
+  }
+  return result;
 }
 /*----------------------------------------------------------------------------*/

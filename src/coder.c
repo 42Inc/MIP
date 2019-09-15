@@ -4,6 +4,7 @@
 #include <MIP_coder.h>
 /*Extern variables------------------------------------------------------------*/
 extern const char zero;
+extern char *filename;
 /*Static variables------------------------------------------------------------*/
 
 /*Global variables------------------------------------------------------------*/
@@ -31,7 +32,7 @@ int fi0_coder() {
   int number = 0;
   int index = 0;
   int return_code = 0;
-  char *out_filename = "a.code";
+  char *out_filename = filename ? filename : "a.code";
   int out_fd = -1;
   int mod = 0;
   int div = 0;
@@ -103,10 +104,62 @@ int fi0_coder() {
 }
 /*----------------------------------------------------------------------------*/
 int fi1_coder() {
+  char c = 0;
+  int read_num = 0;
+  int number = 0;
+  int index = 0;
+  int return_code = 0;
+  char *out_filename = filename ? filename : "a.code";
+  int out_fd = -1;
+  if ((out_fd = open(out_filename, O_WRONLY | O_CREAT | O_TRUNC, 0664)) == -1) {
+    fprintf(stderr, "File open error! [coder]\n");
+    return 1;
+  }
+  do {
+    return_code = read(STDIN_FILENO, &c, 1);
+    if (is_num(c)) {
+      read_num = 1;
+      number = number * (pow(10, index)) + (c - '0');
+      ++index;
+    } else {
+      if (read_num) {
+	fprintf(stderr, "Read num - %d [coder]\n", number);
+        read_num = 0;
+        number = 0;
+        index = 0;
+      }
+    }
+  } while (return_code != 0);
   return 0;
 }
 /*----------------------------------------------------------------------------*/
 int fi2_coder() {
+  char c = 0;
+  int read_num = 0;
+  int number = 0;
+  int index = 0;
+  int return_code = 0;
+  char *out_filename = filename ? filename : "a.code";
+  int out_fd = -1;
+  if ((out_fd = open(out_filename, O_WRONLY | O_CREAT | O_TRUNC, 0664)) == -1) {
+    fprintf(stderr, "File open error! [coder]\n");
+    return 1;
+  }
+  do {
+    return_code = read(STDIN_FILENO, &c, 1);
+    if (is_num(c)) {
+      read_num = 1;
+      number = number * (pow(10, index)) + (c - '0');
+      ++index;
+    } else {
+      if (read_num) {
+        fprintf(stderr, "Read num - %d [coder]\n", number);
+        read_num = 0;
+        number = 0;
+        index = 0;
+      }
+    }
+  } while (return_code != 0);
   return 0;
 }
 /*----------------------------------------------------------------------------*/

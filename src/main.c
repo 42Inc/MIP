@@ -8,10 +8,12 @@
 
 /*Global variables------------------------------------------------------------*/
 const char zero = 0;
+char *filename = NULL;
 /*Functios--------------------------------------------------------------------*/
 int main(int argc, char **argv) {
   char *method = argv[1];
   char *code = argv[2];
+  filename = argv[3];
   int exit_code = -1;
   if (argc > 1) {
     if (!strcmp(method, "coder")) {

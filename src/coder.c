@@ -107,7 +107,8 @@ int fi1_coder() {
   char c = 0;
   int read_num = 0;
   unsigned int number = 0;
-  unsigned int binary_lenght = 0;
+  unsigned int binary_length = 0;
+  unsigned int write_bits = 0;
   int index = 0;
   int return_code = 0;
   char *out_filename = filename ? filename : "a.code";
@@ -124,8 +125,14 @@ int fi1_coder() {
       ++index;
     } else {
       if (read_num) {
-        binary_lenght = get_binary_lenght(number);
-        fprintf(stderr, "Read num - %u [%u] [coder]\n", number, binary_lenght);
+        binary_length = get_binary_length(number);
+        write_bits = number + binary_length;
+        fprintf(
+          stderr,
+          "Read num - %u [%u]. Write bits - %u [coder]\n",
+          number,
+          binary_length,
+          write_bits);
         read_num = 0;
         number = 0;
         index = 0;
@@ -165,10 +172,10 @@ int fi2_coder() {
   return 0;
 }
 /*----------------------------------------------------------------------------*/
-unsigned int get_binary_lenght(unsigned int num) {
+unsigned int get_binary_length(unsigned int num) {
   unsigned int result = 0;
   if (num == 0)
-    return result;
+    return 1;
   while (num > 0) {
     num = num >> 1;
     ++result;

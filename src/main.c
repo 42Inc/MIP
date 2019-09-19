@@ -47,8 +47,8 @@ int main(int argc, char **argv) {
 /*----------------------------------------------------------------------------*/
 int helper() {
   fprintf(stderr, "Usage:\n");
-  fprintf(stderr, "  mip coder <CODE>\n");
-  fprintf(stderr, "  mip decoder <CODE>\n");
+  fprintf(stderr, "  mip coder <CODE> <FILENAME>\n");
+  fprintf(stderr, "  mip decoder <CODE> <FILENAME>\n");
   return 0;
 }
 /*----------------------------------------------------------------------------*/

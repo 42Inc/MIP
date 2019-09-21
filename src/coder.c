@@ -107,8 +107,8 @@ int fi1_coder() {
   char c = 0;
   int read_num = 0;
   int number = 0;
-  unsigned int binary_length = 0;
-  unsigned int write_bits = 0;
+  int binary_length = 0;
+  int write_bits = 0;
   int mod = 0;
   int div = 0;
   char write_byte = 0;
@@ -119,6 +119,7 @@ int fi1_coder() {
   int i = 0;
   char write_byte_index = 0;
   char from_last_byte = 0;
+  char full_byte_flag = 0;
   if ((out_fd = open(out_filename, O_WRONLY | O_CREAT | O_TRUNC, 0664)) == -1) {
     fprintf(stderr, "File open error! [coder]\n");
     return 1;
@@ -140,6 +141,26 @@ int fi1_coder() {
           binary_length,
           write_bits);
         /* Put coder process here */
+      label_write_byte:
+        if (full_byte_flag) {
+          write(out_fd, &write_byte, 1);
+          write_byte = 0;
+          write_byte_index = 0;
+          full_byte_flag = 0;
+        }
+        if (from_last_byte - 1 >= 2*binary_length) {
+          write_byte_index = write_byte_index - 2*binary_length;
+          write_byte = write_byte | (number << write_byte_index);
+          from_last_byte = from_last_byte - 2*binary_length + 1;
+          if (from_last_byte < 0) {
+            from_last_byte = 0;
+          }
+          if (from_last_byte == 0) {
+            full_byte_flag = 1;
+          }
+          printf("%d\n", from_last_byte);
+          goto label_end_coder;
+        }
         div = (binary_length - from_last_byte) / 8;
         mod = (binary_length - from_last_byte) % 8;
         from_last_byte = 0;
@@ -147,16 +168,25 @@ int fi1_coder() {
           write(out_fd, &zero, 1); // write zero_byte
         }
         write_byte_index = 8 - mod - 1;
-        write_byte = write_byte | (1 << write_byte_index);
+//      write_byte = write_byte | (1 << write_byte_index);
+        if (mod >= binary_length) {
+          write_byte = write_byte | (number << write_byte_index);
+          from_last_byte = write_byte_index - binary_length;
+        }
+        if (from_last_byte == 0) {
+          full_byte_flag = 1;
+          goto label_write_byte;
+        }
+        label_end_coder:
         read_num = 0;
         number = 0;
         index = 0;
       }
+      /*----------------------------------------------------------------------------*/
     }
   } while (return_code != 0);
   return 0;
 }
-/*----------------------------------------------------------------------------*/
 int fi2_coder() {
   char c = 0;
   int read_num = 0;
@@ -187,7 +217,7 @@ int fi2_coder() {
   return 0;
 }
 /*----------------------------------------------------------------------------*/
-unsigned int get_binary_length(unsigned int num) {
+int get_binary_length(int num) {
   unsigned int result = 0;
   if (num == 0)
     return 1;

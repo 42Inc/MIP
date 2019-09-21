@@ -29,7 +29,7 @@ int coder(int code) {
 int fi0_coder() {
   char c = 0;
   int read_num = 0;
-  unsigned int number = 0;
+  int number = 0;
   int index = 0;
   int return_code = 0;
   char *out_filename = filename ? filename : "a.code";
@@ -54,7 +54,7 @@ int fi0_coder() {
       ++index;
     } else {
       if (read_num) {
-        fprintf(stderr, "Read num - %u [coder]\n", number);
+        fprintf(stderr, "Read num - %d [coder]\n", number);
       /* Put coder process here */
       label_write_byte:
         if (full_byte_flag) {
@@ -106,13 +106,19 @@ int fi0_coder() {
 int fi1_coder() {
   char c = 0;
   int read_num = 0;
-  unsigned int number = 0;
+  int number = 0;
   unsigned int binary_length = 0;
   unsigned int write_bits = 0;
+  int mod = 0;
+  int div = 0;
+  char write_byte = 0;
   int index = 0;
   int return_code = 0;
   char *out_filename = filename ? filename : "a.code";
   int out_fd = -1;
+  int i = 0;
+  char write_byte_index = 0;
+  char from_last_byte = 0;
   if ((out_fd = open(out_filename, O_WRONLY | O_CREAT | O_TRUNC, 0664)) == -1) {
     fprintf(stderr, "File open error! [coder]\n");
     return 1;
@@ -126,13 +132,22 @@ int fi1_coder() {
     } else {
       if (read_num) {
         binary_length = get_binary_length(number);
-        write_bits = number + binary_length;
+        write_bits = binary_length << 1;
         fprintf(
           stderr,
-          "Read num - %u [%u]. Write bits - %u [coder]\n",
+          "Read num - %d [%u]. Write bits - %u [coder]\n",
           number,
           binary_length,
           write_bits);
+        /* Put coder process here */
+        div = (binary_length - from_last_byte) / 8;
+        mod = (binary_length - from_last_byte) % 8;
+        from_last_byte = 0;
+        for (i = 0; i < div; ++i) {
+          write(out_fd, &zero, 1); // write zero_byte
+        }
+        write_byte_index = 8 - mod - 1;
+        write_byte = write_byte | (1 << write_byte_index);
         read_num = 0;
         number = 0;
         index = 0;
@@ -145,7 +160,7 @@ int fi1_coder() {
 int fi2_coder() {
   char c = 0;
   int read_num = 0;
-  unsigned int number = 0;
+  int number = 0;
   int index = 0;
   int return_code = 0;
   char *out_filename = filename ? filename : "a.code";
@@ -162,7 +177,7 @@ int fi2_coder() {
       ++index;
     } else {
       if (read_num) {
-        fprintf(stderr, "Read num - %u [coder]\n", number);
+        fprintf(stderr, "Read num - %d [coder]\n", number);
         read_num = 0;
         number = 0;
         index = 0;

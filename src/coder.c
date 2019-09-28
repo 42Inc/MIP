@@ -3,7 +3,9 @@
 /*Include user-defined headers------------------------------------------------*/
 #include <MIP_coder.h>
 /*Extern variables------------------------------------------------------------*/
-extern const char zero;
+extern const char zero_byte;
+extern const char zero_char;
+extern const char one_char;
 extern char *filename;
 /*Static variables------------------------------------------------------------*/
 
@@ -42,9 +44,14 @@ int fi0_coder() {
   char from_last_byte = 0;
   char from_last_byte_flag = 1;
   int i = 0;
-  if ((out_fd = open(out_filename, O_WRONLY | O_CREAT | O_TRUNC, 0664)) == -1) {
-    fprintf(stderr, "File open error! [coder]\n");
-    return 1;
+  if (filename) {
+    if (
+      (out_fd = open(out_filename, O_WRONLY | O_CREAT | O_TRUNC, 0664)) == -1) {
+      fprintf(stderr, "File open error! [coder]\n");
+      return 1;
+    }
+  } else {
+    out_fd = STDOUT_FILENO;
   }
   do {
     return_code = read(STDIN_FILENO, &c, 1);
@@ -84,7 +91,7 @@ int fi0_coder() {
         mod = (number - from_last_byte) % 8;
         from_last_byte = 0;
         for (i = 0; i < div; ++i) {
-          write(out_fd, &zero, 1); // write zero_byte
+          write(out_fd, &zero_byte, 1); // write zero_byte_byte
         }
         write_byte_index = 8 - mod - 1;
         write_byte = write_byte | (1 << write_byte_index);
@@ -109,20 +116,19 @@ int fi1_coder() {
   int number = 0;
   int binary_length = 0;
   int write_bits = 0;
-  int mod = 0;
-  int div = 0;
-  char write_byte = 0;
   int index = 0;
   int return_code = 0;
   char *out_filename = filename ? filename : "a.code";
   int out_fd = -1;
   int i = 0;
-  char write_byte_index = 0;
-  char from_last_byte = 0;
-  char full_byte_flag = 0;
-  if ((out_fd = open(out_filename, O_WRONLY | O_CREAT | O_TRUNC, 0664)) == -1) {
-    fprintf(stderr, "File open error! [coder]\n");
-    return 1;
+  if (filename) {
+    if (
+      (out_fd = open(out_filename, O_WRONLY | O_CREAT | O_TRUNC, 0664)) == -1) {
+      fprintf(stderr, "File open error! [coder]\n");
+      return 1;
+    }
+  } else {
+    out_fd = STDOUT_FILENO;
   }
   do {
     return_code = read(STDIN_FILENO, &c, 1);
@@ -136,57 +142,31 @@ int fi1_coder() {
         write_bits = binary_length << 1;
         fprintf(
           stderr,
-          "Read num - %d [%u]. Write bits - %u [coder]\n",
+          "Read num - %d [%u]. Write - %u [coder]\n",
           number,
           binary_length,
           write_bits);
         /* Put coder process here */
-      label_write_byte:
-        if (full_byte_flag) {
-          write(out_fd, &write_byte, 1);
-          write_byte = 0;
-          write_byte_index = 0;
-          full_byte_flag = 0;
+        for (i = 0; i < binary_length; ++i) {
+          write(out_fd, &zero_char, 1);
         }
-        if (from_last_byte - 1 >= 2*binary_length) {
-          write_byte_index = write_byte_index - 2*binary_length;
-          write_byte = write_byte | (number << write_byte_index);
-          from_last_byte = from_last_byte - 2*binary_length + 1;
-          if (from_last_byte < 0) {
-            from_last_byte = 0;
+        write(out_fd, &one_char, 1);
+        for (i = binary_length - 2; i >= 0; --i) {
+          if ((number >> i) & 0x1) {
+            write(out_fd, &zero_char, 1);
+          } else {
+            write(out_fd, &one_char, 1);
           }
-          if (from_last_byte == 0) {
-            full_byte_flag = 1;
-          }
-          printf("%d\n", from_last_byte);
-          goto label_end_coder;
         }
-        div = (binary_length - from_last_byte) / 8;
-        mod = (binary_length - from_last_byte) % 8;
-        from_last_byte = 0;
-        for (i = 0; i < div; ++i) {
-          write(out_fd, &zero, 1); // write zero_byte
-        }
-        write_byte_index = 8 - mod - 1;
-//      write_byte = write_byte | (1 << write_byte_index);
-        if (mod >= binary_length) {
-          write_byte = write_byte | (number << write_byte_index);
-          from_last_byte = write_byte_index - binary_length;
-        }
-        if (from_last_byte == 0) {
-          full_byte_flag = 1;
-          goto label_write_byte;
-        }
-        label_end_coder:
         read_num = 0;
         number = 0;
         index = 0;
       }
-      /*----------------------------------------------------------------------------*/
     }
   } while (return_code != 0);
   return 0;
 }
+/*----------------------------------------------------------------------------*/
 int fi2_coder() {
   char c = 0;
   int read_num = 0;
@@ -195,9 +175,14 @@ int fi2_coder() {
   int return_code = 0;
   char *out_filename = filename ? filename : "a.code";
   int out_fd = -1;
-  if ((out_fd = open(out_filename, O_WRONLY | O_CREAT | O_TRUNC, 0664)) == -1) {
-    fprintf(stderr, "File open error! [coder]\n");
-    return 1;
+  if (filename) {
+    if (
+      (out_fd = open(out_filename, O_WRONLY | O_CREAT | O_TRUNC, 0664)) == -1) {
+      fprintf(stderr, "File open error! [coder]\n");
+      return 1;
+    }
+  } else {
+    out_fd = STDOUT_FILENO;
   }
   do {
     return_code = read(STDIN_FILENO, &c, 1);

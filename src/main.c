@@ -7,7 +7,9 @@
 /*Static variables------------------------------------------------------------*/
 
 /*Global variables------------------------------------------------------------*/
-const char zero = 0;
+const char zero_byte = 0;
+const char zero_char = '0';
+const char one_char = '1';
 char *filename = NULL;
 /*Functios--------------------------------------------------------------------*/
 int main(int argc, char **argv) {

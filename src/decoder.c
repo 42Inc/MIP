@@ -3,7 +3,9 @@
 /*Include user-defined headers------------------------------------------------*/
 #include <MIP_decoder.h>
 /*Extern variables------------------------------------------------------------*/
-extern const char zero;
+extern const char zero_byte;
+extern const char zero_char;
+extern const char one_char;
 extern char *filename;
 /*Static variables------------------------------------------------------------*/
 
@@ -33,9 +35,13 @@ int fi0_decoder() {
   char *out_filename = filename ? filename : "a.decode";
   FILE *out_fd = NULL;
   int i = 0;
-  if ((out_fd = fopen(out_filename, "w")) == NULL) {
-    fprintf(stderr, "File open error! [decoder]\n");
-    return 1;
+  if (filename) {
+    if ((out_fd = fopen(out_filename, "w")) == NULL) {
+      fprintf(stderr, "File open error! [decoder]\n");
+      return 1;
+    }
+  } else {
+    out_fd = stdout;
   }
   do {
     return_code = read(STDIN_FILENO, &c, 1);
@@ -62,9 +68,13 @@ int fi1_decoder() {
   int return_code = 0;
   char *out_filename = filename ? filename : "a.decode";
   FILE *out_fd = NULL;
-  if ((out_fd = fopen(out_filename, "w")) == NULL) {
-    fprintf(stderr, "File open error! [decoder]\n");
-    return 1;
+  if (filename) {
+    if ((out_fd = fopen(out_filename, "w")) == NULL) {
+      fprintf(stderr, "File open error! [decoder]\n");
+      return 1;
+    }
+  } else {
+    out_fd = stdout;
   }
   do {
     return_code = read(STDIN_FILENO, &c, 1);
@@ -78,9 +88,13 @@ int fi2_decoder() {
   int return_code = 0;
   char *out_filename = filename ? filename : "a.decode";
   FILE *out_fd = NULL;
-  if ((out_fd = fopen(out_filename, "w")) == NULL) {
-    fprintf(stderr, "File open error! [decoder]\n");
-    return 1;
+  if (filename) {
+    if ((out_fd = fopen(out_filename, "w")) == NULL) {
+      fprintf(stderr, "File open error! [decoder]\n");
+      return 1;
+    }
+  } else {
+    out_fd = stdout;
   }
   do {
     return_code = read(STDIN_FILENO, &c, 1);

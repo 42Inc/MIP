@@ -153,9 +153,9 @@ int fi1_coder() {
         write(out_fd, &one_char, 1);
         for (i = binary_length - 2; i >= 0; --i) {
           if ((number >> i) & 0x1) {
-            write(out_fd, &zero_char, 1);
-          } else {
             write(out_fd, &one_char, 1);
+          } else {
+            write(out_fd, &zero_char, 1);
           }
         }
         read_num = 0;

@@ -80,7 +80,6 @@ int fi1_decoder() {
     return_code = read(STDIN_FILENO, &c, 1);
   } while (return_code != 0);
   return 0;
-  return 0;
 }
 /*----------------------------------------------------------------------------*/
 int fi2_decoder() {

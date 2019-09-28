@@ -15,5 +15,6 @@ int fi0_coder();
 int fi1_coder();
 int fi2_coder();
 int get_binary_length(int num);
+int compressor(char sym, int out_fd);
 /*----------------------------------------------------------------------------*/
 #endif

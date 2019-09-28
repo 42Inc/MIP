@@ -148,14 +148,18 @@ int fi1_coder() {
           write_bits);
         /* Put coder process here */
         for (i = 0; i < binary_length; ++i) {
-          write(out_fd, &zero_char, 1);
+          compressor(zero_char, out_fd);
+          //          write(out_fd, &zero_char, 1);
         }
-        write(out_fd, &one_char, 1);
+        compressor(one_char, out_fd);
+        //        write(out_fd, &one_char, 1);
         for (i = binary_length - 2; i >= 0; --i) {
           if ((number >> i) & 0x1) {
-            write(out_fd, &one_char, 1);
+            compressor(one_char, out_fd);
+            //            write(out_fd, &one_char, 1);
           } else {
-            write(out_fd, &zero_char, 1);
+            compressor(zero_char, out_fd);
+            //            write(out_fd, &zero_char, 1);
           }
         }
         read_num = 0;
@@ -164,6 +168,7 @@ int fi1_coder() {
       }
     }
   } while (return_code != 0);
+  compressor('-', out_fd);
   return 0;
 }
 /*----------------------------------------------------------------------------*/
@@ -211,5 +216,22 @@ int get_binary_length(int num) {
     ++result;
   }
   return result;
+}
+/*----------------------------------------------------------------------------*/
+int compressor(char sym, int out_fd) {
+  static int compressor_write_byte = 0;
+  static int compressor_byte_index = 7;
+  if (sym == '-') {
+    return 0;
+  }
+  compressor_write_byte
+    = compressor_write_byte | ((sym - '0') << compressor_byte_index);
+  --compressor_byte_index;
+  if (compressor_byte_index < 0) {
+    write(out_fd, &compressor_write_byte, 1);
+    compressor_byte_index = 7;
+    compressor_write_byte = 0;
+  }
+  return 0;
 }
 /*----------------------------------------------------------------------------*/

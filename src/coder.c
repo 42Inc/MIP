@@ -36,13 +36,6 @@ int fi0_coder() {
   int return_code = 0;
   char *out_filename = filename ? filename : "a.code";
   int out_fd = -1;
-  int mod = 0;
-  int div = 0;
-  char write_byte = 0;
-  char write_byte_index = 0;
-  char full_byte_flag = 0;
-  char from_last_byte = 0;
-  char from_last_byte_flag = 1;
   int i = 0;
   if (filename) {
     if (
@@ -62,43 +55,11 @@ int fi0_coder() {
     } else {
       if (read_num) {
         fprintf(stderr, "Read num - %d [coder]\n", number);
-      /* Put coder process here */
-      label_write_byte:
-        if (full_byte_flag) {
-          write(out_fd, &write_byte, 1);
-          write_byte = 0;
-          write_byte_index = 0;
-          full_byte_flag = 0;
-          from_last_byte_flag = 0;
+        /* Put coder process here */
+        for (i = 0; i < number; ++i) {
+          compressor(zero_char, out_fd);
         }
-        if (from_last_byte - 1 >= number) {
-          write_byte_index = write_byte_index - number - 1;
-          write_byte = write_byte | (1 << write_byte_index);
-          from_last_byte = from_last_byte - number - 1;
-          if (from_last_byte < 0) {
-            from_last_byte = 0;
-          }
-          if (from_last_byte == 0) {
-            full_byte_flag = 1;
-          }
-          goto label_end_coder;
-        } else if (from_last_byte > 0 && from_last_byte_flag) {
-          full_byte_flag = 1;
-          goto label_write_byte;
-        }
-        from_last_byte_flag = 1;
-        div = (number - from_last_byte) / 8;
-        mod = (number - from_last_byte) % 8;
-        from_last_byte = 0;
-        for (i = 0; i < div; ++i) {
-          write(out_fd, &zero_byte, 1); // write zero_byte_byte
-        }
-        write_byte_index = 8 - mod - 1;
-        write_byte = write_byte | (1 << write_byte_index);
-        if (write_byte_index > 0) {
-          from_last_byte = write_byte_index;
-        }
-      label_end_coder:
+        compressor(one_char, out_fd);
         read_num = 0;
         number = 0;
         index = 0;
@@ -106,7 +67,7 @@ int fi0_coder() {
     }
   } while (return_code != 0);
   // write last byte
-  write(out_fd, &write_byte, 1);
+  compressor(zero_byte, out_fd);
   return 0;
 }
 /*----------------------------------------------------------------------------*/
@@ -222,6 +183,7 @@ int compressor(char sym, int out_fd) {
   static int compressor_write_byte = 0;
   static int compressor_byte_index = 7;
   if (sym == zero_byte) {
+    write(out_fd, &compressor_write_byte, 1);
     return 0;
   }
   compressor_write_byte

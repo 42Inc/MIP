@@ -210,7 +210,7 @@ int fi2_coder() {
 int get_binary_length(int num) {
   unsigned int result = 0;
   if (num == 0)
-    return 1;
+    return 0;
   while (num > 0) {
     num = num >> 1;
     ++result;

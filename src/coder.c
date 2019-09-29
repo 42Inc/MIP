@@ -168,7 +168,7 @@ int fi1_coder() {
       }
     }
   } while (return_code != 0);
-  compressor('-', out_fd);
+  compressor(zero_byte, out_fd);
   return 0;
 }
 /*----------------------------------------------------------------------------*/
@@ -221,7 +221,7 @@ int get_binary_length(int num) {
 int compressor(char sym, int out_fd) {
   static int compressor_write_byte = 0;
   static int compressor_byte_index = 7;
-  if (sym == '-') {
+  if (sym == zero_byte) {
     return 0;
   }
   compressor_write_byte

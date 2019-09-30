@@ -11,12 +11,13 @@ INC_DIR = ./include
 INCLUDES = -I $(INC_DIR)
 DIRS = $(BIN_DIR) $(OBJ_DIR)
 OBJ = $(OBJ_DIR)/coder.o $(OBJ_DIR)/decoder.o $(OBJ_DIR)/main.o
-
+OUTERS := *.code *.decode
 .PHONY: all bins clean rebuild
 all: bins
 
 bins: $(DIRS) $(OBJ)
 	$(CC) $(OBJ) $(CFLAGS) -o $(BIN_DIR)/mip $(LIB) $(INCLUDES)
+	$(if ifeq test -f "./bin/mtf" 0, @chmod +x ./src/mtf.rb && ln -s ${PWD}/src/mtf.rb ./bin/mtf)
 
 $(OBJ_DIR):
 	$(if ifeq test -d "$(OBJ_DIR)" 0, @mkdir -p $(OBJ_DIR))
@@ -29,6 +30,7 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 
 clean:
 	$(QUIET)rm -rfv $(DIRS)
+	$(QUIET)rm -rfv ${OUTERS}
 
 rebuild:
 	make clean ; make

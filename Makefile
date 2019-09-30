@@ -17,7 +17,7 @@ all: bins
 
 bins: $(DIRS) $(OBJ)
 	$(CC) $(OBJ) $(CFLAGS) -o $(BIN_DIR)/mip $(LIB) $(INCLUDES)
-	$(if ifeq test -f "./bin/mtf" 0, @chmod +x ./src/mtf.rb && ln -s ${PWD}/src/mtf.rb ./bin/mtf)
+	@test -e ${PWD}/bin/mtf || (chmod +x ${PWD}/src/mtf.rb && ln -s ${PWD}/src/mtf.rb ${PWD}/bin/mtf)
 
 $(OBJ_DIR):
 	$(if ifeq test -d "$(OBJ_DIR)" 0, @mkdir -p $(OBJ_DIR))

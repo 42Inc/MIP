@@ -47,6 +47,7 @@ int fi0_decoder() {
     return_code = read(STDIN_FILENO, &c, 1);
     if (c == 0) {
       write_num += 8;
+      fprintf(stderr, "= %u [i = -]\n", write_num);
     } else {
       for (i = 0; i < 8; ++i) {
         if ((c & 0x80) == 0) {
@@ -56,6 +57,7 @@ int fi0_decoder() {
           fprintf(out_fd, "%u ", write_num);
           write_num = 0;
         }
+        fprintf(stderr, "= %u [i = %d]\n", write_num, i);
         c = c << 1;
       }
     }

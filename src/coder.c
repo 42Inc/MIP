@@ -32,7 +32,6 @@ int fi0_coder() {
   char c = 0;
   int read_num = 0;
   int number = 0;
-  int index = 0;
   int return_code = 0;
   char *out_filename = filename ? filename : "a.code";
   int out_fd = -1;
@@ -50,8 +49,7 @@ int fi0_coder() {
     return_code = read(STDIN_FILENO, &c, 1);
     if (is_num(c)) {
       read_num = 1;
-      number = number * (pow(10, index)) + (c - '0');
-      ++index;
+      number = number * 10 + (c - '0');
     } else {
       if (read_num) {
         fprintf(stderr, "Read num - %d [coder]\n", number);
@@ -62,7 +60,6 @@ int fi0_coder() {
         compressor(one_char, out_fd);
         read_num = 0;
         number = 0;
-        index = 0;
       }
     }
   } while (return_code != 0);
@@ -77,7 +74,6 @@ int fi1_coder() {
   int number = 0;
   int binary_length = 0;
   int write_bits = 0;
-  int index = 0;
   int return_code = 0;
   char *out_filename = filename ? filename : "a.code";
   int out_fd = -1;
@@ -95,8 +91,7 @@ int fi1_coder() {
     return_code = read(STDIN_FILENO, &c, 1);
     if (is_num(c)) {
       read_num = 1;
-      number = number * (pow(10, index)) + (c - '0');
-      ++index;
+      number = number * 10 + (c - '0');
     } else {
       if (read_num) {
         binary_length = get_binary_length(number);
@@ -137,7 +132,6 @@ int fi1_coder() {
         }
         read_num = 0;
         number = 0;
-        index = 0;
       }
     }
   } while (return_code != 0);
@@ -151,7 +145,6 @@ int fi2_coder() {
   char c = 0;
   int read_num = 0;
   int number = 0;
-  int index = 0;
   int return_code = 0;
   char *out_filename = filename ? filename : "a.code";
   int out_fd = -1;
@@ -171,8 +164,7 @@ int fi2_coder() {
     return_code = read(STDIN_FILENO, &c, 1);
     if (is_num(c)) {
       read_num = 1;
-      number = number * (pow(10, index)) + (c - '0');
-      ++index;
+      number = number * 10 + (c - '0');
     } else {
       if (read_num) {
         number_binary_length = get_binary_length(number);
@@ -227,7 +219,6 @@ int fi2_coder() {
         }
         read_num = 0;
         number = 0;
-        index = 0;
       }
     }
   } while (return_code != 0);

@@ -21,6 +21,12 @@ class BWT
   end
 end
 
+def helper
+  STDERR.print("Usage:\n")
+  STDERR.print("\t./bin/bwt coder\n")
+  STDERR.print("\t./bin/bwt decoder\n")
+end
+
 if (ARGV.length > 0)
   if (ARGV[0] == "coder")
     BWT_Obj = BWT.new
@@ -30,7 +36,9 @@ if (ARGV.length > 0)
     BWT_Obj.run_decoder
   else
     STDERR.print("Parameter not found! [BWT]\n")
+    helper
   end
 else
   STDERR.print("Parameter not found! [BWT]\n")
+  helper
 end

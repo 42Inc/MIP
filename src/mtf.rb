@@ -13,8 +13,10 @@ class MTF
   def run_compress
     STDERR.print("#{@alphabet}\n")
     while true
-      @c = STDIN.read().chomp!
+      break if STDIN.eof?
+      @c = STDIN.read().chomp
       break if @c.nil?
+        STDERR.print("#{@c}\n")
       _array = @c.bytes
       _array.each_with_index do |v, i|
         STDERR.print("Read code - #{v}\n")
@@ -30,7 +32,7 @@ class MTF
     STDERR.print("#{@alphabet}\n")
     while true
       break if STDIN.eof?
-      @n = STDIN.read()
+      @n = STDIN.read().chomp
       break if @n.nil?
       _array = @n.split(' ')
       _array.each_with_index do |v, i|

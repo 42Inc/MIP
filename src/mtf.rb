@@ -14,16 +14,12 @@ class MTF
     STDERR.print("#{@alphabet}\n")
     while true
       break if STDIN.eof?
-      @c = STDIN.read().chomp
+      @c = STDIN.read()
       break if @c.nil?
-        STDERR.print("#{@c}\n")
       _array = @c.bytes
       _array.each_with_index do |v, i|
-        STDERR.print("Read code - #{v}\n")
-        STDERR.print("Found with index - #{@alphabet.index(v.chr)}\n")
         STDOUT.print("#{@alphabet.index(v.chr)} ")
         @alphabet.unshift(@alphabet.delete(v.chr))
-        STDERR.print("#{@alphabet}\n")
       end
     end
   end
@@ -32,15 +28,13 @@ class MTF
     STDERR.print("#{@alphabet}\n")
     while true
       break if STDIN.eof?
-      @n = STDIN.read().chomp
+      @n = STDIN.read()
       break if @n.nil?
       _array = @n.split(' ')
       _array.each_with_index do |v, i|
         _index = v.to_i
-        STDERR.print("Found by index [#{v} | #{_index}] - #{@alphabet[_index]}\n")
         STDOUT.print("#{@alphabet[_index]}")
         @alphabet.unshift(@alphabet.delete(@alphabet[_index]))
-        STDERR.print("#{@alphabet}\n")
       end
     end
   end

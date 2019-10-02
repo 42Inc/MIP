@@ -10,7 +10,7 @@ BIN_DIR = ./bin
 INC_DIR = ./include
 INCLUDES = -I $(INC_DIR)
 DIRS = $(BIN_DIR) $(OBJ_DIR)
-OBJ = $(OBJ_DIR)/coder.o $(OBJ_DIR)/decoder.o $(OBJ_DIR)/main.o
+OBJ = $(OBJ_DIR)/coder.o $(OBJ_DIR)/decoder.o $(OBJ_DIR)/bwt.o $(OBJ_DIR)/main.o
 OUTERS := *.code *.decode
 .PHONY: all bins clean rebuild
 all: bins

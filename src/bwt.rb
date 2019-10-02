@@ -9,7 +9,7 @@ class BWT
     @string = STDIN.read().chomp!.split ''
     STDERR.print("Read - #{@string}\n")
     _length = @string.length
-    (1.._length).each do |v|
+    _length.times do |v|
       @array.push @string.clone
       @string.rotate! 1
     end

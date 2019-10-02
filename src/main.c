@@ -42,6 +42,22 @@ int main(int argc, char **argv) {
       } else {
         return exit_code;
       }
+    } else if (!strcmp(method, "bwt_coder")) {
+      /*BWT Coder*/
+      if ((exit_code = bwt_coder(atoi(code))) == 255) {
+        fprintf(stderr, "Invalid [bwt_coder]\n");
+        return helper();
+      } else {
+        return exit_code;
+      }
+    } else if (!strcmp(method, "bwt_decoder")) {
+      /*BWT Decoder*/
+      if ((exit_code = bwt_decoder(atoi(code))) > 0) {
+        fprintf(stderr, "Invalid [bwt_decoder]\n");
+        return helper();
+      } else {
+        return exit_code;
+      }
     }
   }
   return helper();
@@ -51,6 +67,8 @@ int helper() {
   fprintf(stderr, "Usage:\n");
   fprintf(stderr, "  mip coder <CODE> <FILENAME>\n");
   fprintf(stderr, "  mip decoder <CODE> <FILENAME>\n");
+  fprintf(stderr, "  mip bwt_coder\n");
+  fprintf(stderr, "  mip bwt_decoder\n");
   return 0;
 }
 /*----------------------------------------------------------------------------*/

@@ -11,7 +11,7 @@ class BWT
     _length = @string.length
     (1.._length).each do |v|
       @array.push @string.clone
-      @string = @string.rotate 1
+      @string.rotate! 1
     end
     STDERR.print("Array:\n")
     @array.each_with_index do |v, i|
@@ -19,7 +19,13 @@ class BWT
     end
     _original_string = @array[0]
     @array.sort! do |a, b|
-      a[a.length - 2].bytes[0] <=> b[b.length - 2].bytes[0]
+      _a = a.clone
+      _b = b.clone
+      _a.pop
+      _b.pop
+      _a.reverse!
+      _b.reverse!
+      _a <=> _b
     end
     STDERR.print("\nSorted array: \n")
     @array.each_with_index do |v, i|
@@ -37,11 +43,12 @@ class BWT
   def run_decoder
       @string = STDIN.read().split ' '
       return if @string.length < 2
-      _index = @string[1].to_i
+      _index = @string[1].clone.to_i
       _str = @string[0]
       _array_orig = Array.new
       _array_1 = Array.new
       _array_2 = Array.new
+      _array_res = Array.new
       STDERR.print("Read - #{_index} #{_str}\n")
       (1.._str.length).each_with_index do |v, i|
         _array_1.push ([_str[i], i])
@@ -66,6 +73,12 @@ class BWT
       _array_2.each_with_index do |v, i|
         STDERR.print("\t#{v}\n")
       end
+      STDERR.print("\nResult: \n")
+      (1.._str.length).each do |v|
+        _array_res.push _array_2[_index].clone.first
+        _index = _array_2[_index].clone.last
+      end
+      STDOUT.print("#{_array_res.join}")
   end
 end
 

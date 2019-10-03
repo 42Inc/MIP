@@ -4,7 +4,7 @@ class BWT
     @array = Array.new
     @string = ""
   end
-
+  #TODO: make readbyte logic. make block-coder logic
   def run_coder
     @string = STDIN.read().chomp!.split ''
     STDERR.print("Read - #{@string}\n")

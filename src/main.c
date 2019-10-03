@@ -44,7 +44,7 @@ int main(int argc, char **argv) {
       }
     } else if (!strcmp(method, "bwt_coder")) {
       /*BWT Coder*/
-      if ((exit_code = bwt_coder(atoi(code))) == 255) {
+      if ((exit_code = bwt_coder()) == 255) {
         fprintf(stderr, "Invalid [bwt_coder]\n");
         return helper();
       } else {
@@ -52,7 +52,7 @@ int main(int argc, char **argv) {
       }
     } else if (!strcmp(method, "bwt_decoder")) {
       /*BWT Decoder*/
-      if ((exit_code = bwt_decoder(atoi(code))) > 0) {
+      if ((exit_code = bwt_decoder()) > 0) {
         fprintf(stderr, "Invalid [bwt_decoder]\n");
         return helper();
       } else {

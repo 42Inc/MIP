@@ -3,39 +3,53 @@ class MTF
   def initialize
     @alphabet = Array.new
     @c = '\0'
+    @p = '\0'
     @n = 0
     STDERR.print("Generating alphabet...\n")
     (0..255).each_with_index do |v, i|
-      @alphabet.push(i.chr)
+      @alphabet.push(i)
     end
   end
 
   def run_compress
     STDERR.print("#{@alphabet}\n")
+    _first_run = true
     while true
       break if STDIN.eof?
-      @c = STDIN.read()
+      @c = STDIN.readbyte
       break if @c.nil?
-      _array = @c.bytes
-      _array.each_with_index do |v, i|
-        STDOUT.print("#{@alphabet.index(v.chr)} ")
-        @alphabet.unshift(@alphabet.delete(v.chr))
-      end
+      STDOUT.print("#{@alphabet.index(@c)} ")
+      STDERR.print("Read - #{@c} [#{@alphabet.index(@c)}]\n")
+      STDERR.print("#{@alphabet}\n")
+#      _array.each_with_index do |v, i|
+#        STDOUT.print("#{@alphabet.index(v.chr)} ")
+      @alphabet.unshift(@alphabet.delete(@c))
     end
+  end
+
+  def is_num?(param)
+    '0' <= param.chr && param.chr <= '9'
   end
 
   def run_decompress
     STDERR.print("#{@alphabet}\n")
+    _first_run = true
     while true
+      @n = 0
       break if STDIN.eof?
-      @n = STDIN.read()
-      break if @n.nil?
-      _array = @n.split(' ')
-      _array.each_with_index do |v, i|
-        _index = v.to_i
-        STDOUT.print("#{@alphabet[_index]}")
-        @alphabet.unshift(@alphabet.delete(@alphabet[_index]))
+      loop do
+        @c = STDIN.readbyte
+        break if @c.nil?
+        break unless is_num? @c
+        @n = @n*10 + @c.to_i - '0'.bytes[0]
       end
+#      _array.each_with_index do |v, i|
+      _index = @n
+      STDERR.print("Read - #{@n} [#{_index} #{@alphabet[_index]}]\n")
+      STDOUT.print("#{@alphabet[_index].chr}")
+      @alphabet.unshift(@alphabet.delete(@alphabet[_index]))
+      STDERR.print("#{@alphabet}\n")
+#      end
     end
   end
 end

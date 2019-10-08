@@ -3,41 +3,52 @@ class BWT
   def initialize
     @array = Array.new
     @string = ""
+    @blocksize = megabytes 8
+    @c = ""
+  end
+
+  def megabytes num
+    num * (2**20)
   end
   #TODO: make readbyte logic. make block-coder logic
   def run_coder
-    @string = STDIN.read().chomp!.split ''
+    _count = 0;
+    while (_count < @blocksize)
+      break if STDIN.eof?
+      @c = STDIN.readbyte
+      break if @c.nil?
+      @string.concat(@c)
+      _count = _count + 1
+    end
+
     STDERR.print("Read - #{@string}\n")
     _length = @string.length
     _length.times do |v|
-      @array.push @string.clone
-      @string.rotate! 1
+      @array.push v
     end
-    STDERR.print("Array:\n")
+    STDERR.print("Rotate index array:\n")
     @array.each_with_index do |v, i|
-      STDERR.print("#{i}\t#{v.join}\n")
+      STDERR.print("#{i}\t#{v}\n")
     end
-    _original_string = @array[0]
+
     @array.sort! do |a, b|
-      _a = a.clone
-      _b = b.clone
-      _a.pop
-      _b.pop
-      _a.reverse!
-      _b.reverse!
-      _a <=> _b
+      _a = @string.split('').rotate(a)
+      _b = @string.split('').rotate(b)
+      _a[_a.length - 2] <=> _b[_b.length - 2]
     end
-    STDERR.print("\nSorted array: \n")
+    STDERR.print("\nSorted Rotate index array: \n")
     @array.each_with_index do |v, i|
-      STDERR.print("#{i}\t#{v.join}\n")
+      STDERR.print("#{i}\t#{v}\n")
     end
+
     STDERR.print("\nResult: \n")
-    _index = @array.index(_original_string.rotate(1))
+    _index = @array.index(1)
     _str = Array.new
     @array.each_with_index do |v, i|
-      _str.push v[v.length - 1]
+      _tmp = @string.split('').rotate(v)
+      _str.push(_tmp[_tmp.length - 1])
     end
-    STDOUT.print("#{_str.join} #{_index}")
+    STDOUT.print("#{_str.join} #{_index} ")
   end
 
   def run_decoder

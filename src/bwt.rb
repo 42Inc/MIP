@@ -1,95 +1,112 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: false
+
+# BWT
 class BWT
   def initialize
-    @array = Array.new
-    @string = ""
-    @blocksize = megabytes 8
-    @c = ""
+    @array = []
+    @string = ''
+    @blocksize = 10 # megabytes 8
+    @block_read = false
+    @c = ''
   end
 
-  def megabytes num
+  def megabytes(num)
     num * (2**20)
   end
-  #TODO: make readbyte logic. make block-coder logic
+
+  # TODO: make readbyte logic. make block-coder logic
   def run_coder
-    _count = 0;
-    while (_count < @blocksize)
+    loop do
+      @string = ''
+      @array = []
       break if STDIN.eof?
-      @c = STDIN.readbyte
-      break if @c.nil?
-      @string.concat(@c)
-      _count = _count + 1
-    end
 
-    STDERR.print("Read - #{@string}\n")
-    _length = @string.length
-    _length.times do |v|
-      @array.push v
-    end
-    STDERR.print("Rotate index array:\n")
-    @array.each_with_index do |v, i|
-      STDERR.print("#{i}\t#{v}\n")
-    end
+      count = 0
+      while count < @blocksize
+        break if STDIN.eof?
 
-    @array.sort! do |a, b|
-      _a = @string.split('').rotate(a)
-      _b = @string.split('').rotate(b)
-      _a[_a.length - 2] <=> _b[_b.length - 2]
-    end
-    STDERR.print("\nSorted Rotate index array: \n")
-    @array.each_with_index do |v, i|
-      STDERR.print("#{i}\t#{v}\n")
-    end
+        @c = STDIN.readbyte
+        break if @c.nil?
 
-    STDERR.print("\nResult: \n")
-    _index = @array.index(1)
-    _str = Array.new
-    @array.each_with_index do |v, i|
-      _tmp = @string.split('').rotate(v)
-      _str.push(_tmp[_tmp.length - 1])
+        @string.concat(@c)
+        count += 1 if @block_read
+      end
+
+      STDERR.print("Read - #{@string}\n")
+      length = @string.length
+      length.times do |v|
+        @array.push v
+      end
+      STDERR.print("Rotate index array:\n")
+      @array.each_with_index do |v, i|
+        STDERR.print("#{i}\t#{v}\n")
+      end
+
+      @array.sort! do |a, b|
+        a1 = @string.split('').rotate(a)
+        b1 = @string.split('').rotate(b)
+        a1[a1.length - 2] <=> b1[b1.length - 2]
+      end
+      STDERR.print("\nSorted Rotate index array: \n")
+      @array.each_with_index do |v, i|
+        STDERR.print("#{i}\t#{v}\n")
+      end
+
+      STDERR.print("\nResult: \n")
+      index = length == 1 ? 0 : @array.index(1)
+      str = []
+      @array.each_with_index do |v, _i|
+        tmp = @string.split('').rotate(v)
+        str.push(tmp[tmp.length - 1])
+      end
+      STDERR.print("#{str.join} #{index} ")
+      STDOUT.print("#{str.join} #{index} ")
+      break unless @block_read
     end
-    STDOUT.print("#{_str.join} #{_index} ")
   end
 
+  # TODO: make readbyte logic. make block-decoder logic
   def run_decoder
-      @string = STDIN.read().split ' '
-      return if @string.length < 2
-      _index = @string[1].clone.to_i
-      _str = @string[0]
-      _array_orig = Array.new
-      _array_1 = Array.new
-      _array_2 = Array.new
-      _array_res = Array.new
-      STDERR.print("Read - #{_index} #{_str}\n")
-      (1.._str.length).each_with_index do |v, i|
-        _array_1.push ([_str[i], i])
-        _array_orig.push ([_str[i], i])
-      end
-      STDERR.print("Array: \n")
-      _array_orig.each_with_index do |v, i|
-        STDERR.print("\t#{v}\n")
-      end
-      _array_1.sort! do |a, b|
-        a[0].bytes[0] <=> b[0].bytes[0]
-      end
-      STDERR.print("\nSorted array 1: \n")
-      _array_1.each_with_index do |v, i|
-        STDERR.print("\t#{v}\n")
-      end
-      (1.._str.length).each_with_index do |v, i|
-        _array_2.push (_array_1[_array_1.index(_array_orig[v - 1])]).clone
-        _array_2.last[1] = _array_1.index(_array_orig[v - 1])
-      end
-      STDERR.print("\nArray 2: \n")
-      _array_2.each_with_index do |v, i|
-        STDERR.print("\t#{v}\n")
-      end
-      STDERR.print("\nResult: \n")
-      (1.._str.length).each do |v|
-        _array_res.push _array_2[_index].clone.first
-        _index = _array_2[_index].clone.last
-      end
-      STDOUT.print("#{_array_res.join}")
+    @string = STDIN.read.split ' '
+    return if @string.length < 2
+
+    index = @string[1].clone.to_i
+    str = @string[0]
+    array_orig = []
+    array1 = []
+    array2 = []
+    array_res = []
+    STDERR.print("Read - #{index} #{str}\n")
+    (1..str.length).each_with_index do |_v, i|
+      array1.push [str[i], i]
+      array_orig.push [str[i], i]
+    end
+    STDERR.print("Array: \n")
+    array_orig.each_with_index do |v, _i|
+      STDERR.print("\t#{v}\n")
+    end
+    array1.sort! do |a, b|
+      a[0].bytes[0] <=> b[0].bytes[0]
+    end
+    STDERR.print("\nSorted array 1: \n")
+    array1.each_with_index do |v, _i|
+      STDERR.print("\t#{v}\n")
+    end
+    (1..str.length).each_with_index do |v, _i|
+      array2.push(array1[array1.index(array_orig[v - 1])].clone)
+      array2.last[1] = array1.index(array_orig[v - 1])
+    end
+    STDERR.print("\nArray 2: \n")
+    array2.each_with_index do |v, _i|
+      STDERR.print("\t#{v}\n")
+    end
+    STDERR.print("\nResult: \n")
+    (1..str.length).each do |_v|
+      array_res.push array2[index].clone.first
+      index = array2[index].clone.last
+    end
+    STDOUT.print(array_res.join.to_s)
   end
 end
 
@@ -99,12 +116,12 @@ def helper
   STDERR.print("\t./bin/bwt decoder\n")
 end
 
-if (ARGV.length > 0)
-  if (ARGV[0] == "coder")
+if !ARGV.empty?
+  if ARGV[0] == 'coder'
     BWT_Obj = BWT.new
     BWT_Obj.run_coder
-  elsif (ARGV[0] == "decoder")
-  BWT_Obj = BWT.new
+  elsif ARGV[0] == 'decoder'
+    BWT_Obj = BWT.new
     BWT_Obj.run_decoder
   else
     STDERR.print("Parameter not found! [BWT]\n")

@@ -9,6 +9,7 @@ class BWT
     @blocksize = 10 # megabytes 8
     @block_read = false
     @c = ''
+    @n = 0
   end
 
   def megabytes(num)
@@ -32,25 +33,28 @@ class BWT
         @string.concat(@c)
         count += 1 if @block_read
       end
-
-      STDERR.print("Read - #{@string}\n")
+      @string.chomp! if @string[@string.length - 1].eql?("\n")
+      STDERR.print("Read - #{@string} #{@string.bytes}\n")
       length = @string.length
       length.times do |v|
         @array.push v
       end
       STDERR.print("Rotate index array:\n")
       @array.each_with_index do |v, i|
-        STDERR.print("#{i}\t#{v}\n")
+        STDERR.print("#{i}\t#{v} #{@string.split('').rotate(v)}\n")
       end
 
       @array.sort! do |a, b|
         a1 = @string.split('').rotate(a)
         b1 = @string.split('').rotate(b)
-        a1[a1.length - 2] <=> b1[b1.length - 2]
+        a1.delete_at(a1.length - 1)
+        b1.delete_at(b1.length - 1)
+        a1.join.reverse <=> b1.join.reverse
       end
+      
       STDERR.print("\nSorted Rotate index array: \n")
       @array.each_with_index do |v, i|
-        STDERR.print("#{i}\t#{v}\n")
+        STDERR.print("#{i}\t#{v} #{@string.split('').rotate(v)}\n")
       end
 
       STDERR.print("\nResult: \n")
@@ -60,51 +64,84 @@ class BWT
         tmp = @string.split('').rotate(v)
         str.push(tmp[tmp.length - 1])
       end
-      STDERR.print("#{str.join} #{index} ")
+      # STDERR.print("#{str.join} #{index} ")
       STDOUT.print("#{str.join} #{index} ")
       break unless @block_read
     end
   end
 
+  def num?(param)
+    param.chr >= '0' && param.chr <= '9'
+  end
+
   # TODO: make readbyte logic. make block-decoder logic
   def run_decoder
-    @string = STDIN.read.split ' '
-    return if @string.length < 2
+    #    @string = STDIN.read.split ' '
+    #    return if @string.length < 2
+    loop do
+      break if STDIN.eof?
 
-    index = @string[1].clone.to_i
-    str = @string[0]
+      @c = STDIN.readbyte
+      break if @c.eql?(' '.bytes[0])
+
+      @string.concat(@c)
+    end
+
+    loop do
+      break if STDIN.eof?
+
+      @c = STDIN.readbyte
+      break if @c.nil?
+      break unless num? @c
+
+      @n = @n * 10 + @c.to_i - '0'.bytes[0]
+    end
+
+    index = @n
+    #    index = @string[1].clone.to_i
+    str = @string
     array_orig = []
     array1 = []
     array2 = []
     array_res = []
     STDERR.print("Read - #{index} #{str}\n")
+
     (1..str.length).each_with_index do |_v, i|
       array1.push [str[i], i]
       array_orig.push [str[i], i]
     end
+
     STDERR.print("Array: \n")
     array_orig.each_with_index do |v, _i|
       STDERR.print("\t#{v}\n")
     end
+
     array1.sort! do |a, b|
       a[0].bytes[0] <=> b[0].bytes[0]
     end
+
     STDERR.print("\nSorted array 1: \n")
     array1.each_with_index do |v, _i|
       STDERR.print("\t#{v}\n")
     end
+
     (1..str.length).each_with_index do |v, _i|
       array2.push(array1[array1.index(array_orig[v - 1])].clone)
       array2.last[1] = array1.index(array_orig[v - 1])
     end
+
     STDERR.print("\nArray 2: \n")
     array2.each_with_index do |v, _i|
       STDERR.print("\t#{v}\n")
     end
+
     STDERR.print("\nResult: \n")
     (1..str.length).each do |_v|
-      array_res.push array2[index].clone.first
-      index = array2[index].clone.last
+      STDERR.print("\t#{array2[index]} ")
+      a = array2[index].clone
+      array_res.push a.first
+      index = a.last
+      STDERR.print("\t#{array2[index]}\n")
     end
     STDOUT.print(array_res.join.to_s)
   end

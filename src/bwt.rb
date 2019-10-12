@@ -16,7 +16,6 @@ class BWT
     num * (2**20)
   end
 
-  # TODO: make readbyte logic. make block-coder logic
   def run_coder
     loop do
       @string = ''
@@ -51,7 +50,7 @@ class BWT
         b1.delete_at(b1.length - 1)
         a1.join.reverse <=> b1.join.reverse
       end
-      
+
       STDERR.print("\nSorted Rotate index array: \n")
       @array.each_with_index do |v, i|
         STDERR.print("#{i}\t#{v} #{@string.split('').rotate(v)}\n")

@@ -89,7 +89,7 @@ int fi1_coder() {
   }
   do {
     return_code = read(STDIN_FILENO, &c, 1);
-    if (is_num(c)) {
+    if (is_num(c) && return_code > 0) {
       read_num = 1;
       number = number * 10 + (c - '0');
     } else {
@@ -162,7 +162,7 @@ int fi2_coder() {
   }
   do {
     return_code = read(STDIN_FILENO, &c, 1);
-    if (is_num(c)) {
+    if (is_num(c) && return_code > 0) {
       read_num = 1;
       number = number * 10 + (c - '0');
     } else {

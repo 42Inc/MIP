@@ -122,6 +122,7 @@ int fi1_decoder() {
     "dec %%ebx\n\t"
     "jmp FOR_BIN_LEN%=\n\t"
   "END_FOR_BIN_LEN%=:\n\t"
+    "pushq %%rax\n\t"
     : "=m" (write_num)
     : "m" (write_num)
     : "memory", "%eax", "%ebx", "%ecx", "%edx");
@@ -132,13 +133,14 @@ int fi1_decoder() {
     __asm__ volatile (
     "xorl %%ecx, %%ecx\n\t"
     "movl %%ecx, %0\n\t"
+    "popq %%rax\n\t"
     "cmpb %%cl, %%al\n\t"
     "jl DO_WHILE_DECODER_2_END\n\t"
     "jmp DO_WHILE_DECODER_2_START\n\t"
   "DO_WHILE_DECODER_2_END:"
     : "=m" (write_num)
     :
-    : "memory");
+    : "memory", "%eax", "%ecx");
   /* clang-format on */
   return 0;
 }

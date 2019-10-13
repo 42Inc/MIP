@@ -14,5 +14,6 @@ int decoder(int code);
 int fi0_decoder();
 int fi1_decoder();
 int fi2_decoder();
+unsigned char decompressor();
 /*----------------------------------------------------------------------------*/
 #endif

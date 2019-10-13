@@ -78,7 +78,7 @@ int fi1_decoder() {
     out_fd = stdout;
   }
   /* clang-format off */
-    __asm__ volatile(
+  __asm__ volatile(
   "DO_WHILE_DECODER_2_START:"
     "xorq %%rax, %%rax\n\t"
     "xorq %%rbx, %%rbx\n\t"
@@ -130,7 +130,7 @@ int fi1_decoder() {
   fprintf(stderr, "Write num - %d [decoder]\n", write_num);
   fprintf(out_fd, "%u ", write_num);
   /* clang-format off */
-    __asm__ volatile (
+  __asm__ volatile (
     "xorl %%ecx, %%ecx\n\t"
     "movl %%ecx, %0\n\t"
     "popq %%rax\n\t"
@@ -142,6 +142,31 @@ int fi1_decoder() {
     :
     : "memory", "%eax", "%ecx");
   /* clang-format on */
+  /*  int binary_length = 0;
+    char c = 0;
+    int i = 0;
+    do {
+      do {
+        c = decompressor();
+        if (c < 0 && binary_length == 0) {
+          return 0;
+        } else if (c < 0) {
+          return -1;
+        }
+        ++binary_length;
+      } while (c == 0);
+      for (i = 0; i < binary_length - 1; ++i) {
+        write_num = (write_num << 1) | (c & 0x1);
+        if (i == (binary_length - 2))
+          break;
+        c = decompressor();
+      }
+      fprintf(stderr, "Write num - %d [decoder]\n", write_num);
+      fprintf(out_fd, "%u ", write_num);
+      write_num = 0;
+      binary_length = 0;
+    } while (c >= 0);
+  */
   return 0;
 }
 /*----------------------------------------------------------------------------*/

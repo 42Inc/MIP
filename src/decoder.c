@@ -171,8 +171,11 @@ int fi1_decoder() {
 }
 /*----------------------------------------------------------------------------*/
 int fi2_decoder() {
+  int binary_length = 0;
+  int write_num = 0;
+  int two_binary_length = 0;
   char c = 0;
-  int return_code = 0;
+  int i = 0;
   char *out_filename = filename ? filename : "a.decode";
   FILE *out_fd = NULL;
   if (filename) {
@@ -184,8 +187,42 @@ int fi2_decoder() {
     out_fd = stdout;
   }
   do {
-    return_code = read(STDIN_FILENO, &c, 1);
-  } while (return_code != 0);
+    do {
+      c = decompressor();
+      if (c < 0 && two_binary_length == 0) {
+        return 0;
+      } else if (c < 0) {
+        return -1;
+      }
+      ++two_binary_length;
+    } while (c == 0);
+    for (i = 0; i < two_binary_length - 1; ++i) {
+      binary_length = (binary_length << 1) | (c & 0x1);
+      if (i == (two_binary_length - 2))
+        break;
+      c = decompressor();
+    }
+    for (i = 0; i < binary_length; ++i) {
+      if (i == 0 && binary_length > 1)
+        write_num = 1;
+      else
+        write_num = (write_num << 1) | (c & 0x1);
+      //      printf("%d=%d %d\n", i, write_num, c);
+      if (i == (binary_length - 1))
+        break;
+      c = decompressor();
+    }
+    fprintf(
+      stderr,
+      "Write num - %d [%d %d] [decoder]\n",
+      write_num,
+      binary_length,
+      two_binary_length - 1);
+    fprintf(out_fd, "%u ", write_num);
+    write_num = 0;
+    binary_length = 0;
+    two_binary_length = 0;
+  } while (c >= 0);
   return 0;
 }
 /*----------------------------------------------------------------------------*/

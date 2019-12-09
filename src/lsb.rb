@@ -151,7 +151,7 @@ def lsb_r_code(fname, prefix)
   save_combine_channel(img_tmp, "lsb_r_coder_#{prefix}_comb_")
 end
 
-def lsb_decode(fname)
+def lsb_r_decode(fname)
   return if $img.nil?
   print "LSB decode for #{fname}\n"
 end
@@ -170,7 +170,7 @@ unless ARGV.empty? || ARGV.length < 2
   elsif ARGV[0] == 'decoder'
     $image = ARGV[1]
     show_info($image)
-    lsb_decode($image)
+    lsb_r_decode($image)
   else
     STDERR.print("Parameter not found! [LSB]\n")
     helper

@@ -115,9 +115,10 @@ end
 def lsb_r_code(fname, prefix)
   return if $img.nil?
   print "LSB code for #{fname}\n"
-  _write = $pix * $percent / $rate;
+  _write = ($pix * 3 * $percent) / $rate
   _local_rate = $rate
   cur = 0;
+  byte = 0;
   1.times do |y|
     pixels = $img.get_pixels(0, y, 10, 1)
     pixels.each_with_index do |p,x|
@@ -132,17 +133,29 @@ def lsb_r_code(fname, prefix)
   $img.rows.times do |y|
     pixels = img_tmp.get_pixels(0, y, $img.columns, 1)
     pixels.each_with_index do |p,x|
+      flag = 0;
       _local_rate = (_local_rate - 1 + $rate) % $rate
       if (cur < _write && _local_rate == 0)
         rand_num_r = rand() > 0.5 ? 1 : 0
-        rand_num_g = rand() > 0.5 ? 1 : 0
-        rand_num_b = rand() > 0.5 ? 1 : 0
         p.red=(rand_num_r == 1 ? p.red | 0x1 : p.red & ($mask - 1))
-        p.green=(rand_num_g == 1 ? p.green | 0x1 : p.green & ($mask - 1))
-        p.blue=(rand_num_b == 1 ? p.blue | 0x1 : p.blue & ($mask - 1))
-        img_tmp.pixel_color(x, y, p)
         cur = cur + 1
+        flag = flag + 1;
       end
+      _local_rate = (_local_rate - 1 + $rate) % $rate
+      if (cur < _write && _local_rate == 0)
+        rand_num_g = rand() > 0.5 ? 1 : 0
+        p.green=(rand_num_g == 1 ? p.green | 0x1 : p.green & ($mask - 1))
+        cur = cur + 1
+        flag = flag + 1;
+      end
+      _local_rate = (_local_rate - 1 + $rate) % $rate
+      if (cur < _write && _local_rate == 0)
+        rand_num_b = rand() > 0.5 ? 1 : 0
+        p.blue=(rand_num_b == 1 ? p.blue | 0x1 : p.blue & ($mask - 1))
+        cur = cur + 1
+        flag = flag + 1;
+      end
+      img_tmp.pixel_color(x, y, p) if flag > 0
     end
   #    img_tmp.store_pixels(0, y, $columns, 1, pixels)
   end
@@ -156,7 +169,7 @@ end
 def lsb_m_code(fname, prefix)
   return if $img.nil?
   print "LSB code for #{fname}\n"
-  _write = $pix * $percent / $rate;
+  _write = ($pix * 3 * $percent) / $rate
   _local_rate = $rate
   cur = 0;
   1.times do |y|
@@ -173,17 +186,29 @@ def lsb_m_code(fname, prefix)
   $img.rows.times do |y|
     pixels = img_tmp.get_pixels(0, y, $img.columns, 1)
     pixels.each_with_index do |p,x|
+      flag = 0
       _local_rate = (_local_rate - 1 + $rate) % $rate
       if (cur < _write && _local_rate == 0)
         rand_num_r = rand() > 0.5 ? 1 : 0
-        rand_num_g = rand() > 0.5 ? 1 : 0
-        rand_num_b = rand() > 0.5 ? 1 : 0
         p.red=(rand_num_r == 1 ? (p.red + 1) % $mask : (p.red - 1 + $mask) % $mask)
-        p.green=(rand_num_g == 1 ? (p.green + 1) % $mask : (p.green - 1 + $mask) % $mask)
-        p.blue=(rand_num_b == 1 ? (p.blue + 1) % $mask : (p.blue - 1 + $mask) % $mask)
-        img_tmp.pixel_color(x, y, p)
         cur = cur + 1
+        flag = flag + 1;
       end
+      _local_rate = (_local_rate - 1 + $rate) % $rate
+      if (cur < _write && _local_rate == 0)
+        rand_num_g = rand() > 0.5 ? 1 : 0
+        p.green=(rand_num_g == 1 ? (p.green + 1) % $mask : (p.green - 1 + $mask) % $mask)
+        cur = cur + 1
+        flag = flag + 1;
+      end
+      _local_rate = (_local_rate - 1 + $rate) % $rate
+      if (cur < _write && _local_rate == 0)
+        rand_num_b = rand() > 0.5 ? 1 : 0
+        p.blue=(rand_num_b == 1 ? (p.blue + 1) % $mask : (p.blue - 1 + $mask) % $mask)
+        cur = cur + 1
+        flag = flag + 1;
+      end
+      img_tmp.pixel_color(x, y, p) if flag > 0
     end
   #    img_tmp.store_pixels(0, y, $columns, 1, pixels)
   end

@@ -10,7 +10,7 @@ $pix = 0
 
 $mask = 0xFFFF
 
-$percent = 0.7
+$percent = 0.25
 
 def show_info(fname)
   $img = Magick::Image::read(fname).first

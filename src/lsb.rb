@@ -7,7 +7,7 @@ $img = nil
 $columns = 0
 $rows = 0
 $pix = 0
-
+$rate = 1
 $mask = 0xFFFF
 
 $percent = 0.25
@@ -115,7 +115,8 @@ end
 def lsb_r_code(fname, prefix)
   return if $img.nil?
   print "LSB code for #{fname}\n"
-  _write = $pix * $percent;
+  _write = $pix * $percent / $rate;
+  _local_rate = $rate
   cur = 0;
   1.times do |y|
     pixels = $img.get_pixels(0, y, 10, 1)
@@ -131,7 +132,8 @@ def lsb_r_code(fname, prefix)
   $img.rows.times do |y|
     pixels = img_tmp.get_pixels(0, y, $img.columns, 1)
     pixels.each_with_index do |p,x|
-      if (cur < _write)
+      _local_rate = (_local_rate - 1 + $rate) % $rate
+      if (cur < _write && _local_rate == 0)
         rand_num_r = rand() > 0.5 ? 1 : 0
         rand_num_g = rand() > 0.5 ? 1 : 0
         rand_num_b = rand() > 0.5 ? 1 : 0
@@ -151,6 +153,47 @@ def lsb_r_code(fname, prefix)
   save_combine_channel(img_tmp, "lsb_r_coder_#{prefix}_comb_")
 end
 
+def lsb_m_code(fname, prefix)
+  return if $img.nil?
+  print "LSB code for #{fname}\n"
+  _write = $pix * $percent / $rate;
+  _local_rate = $rate
+  cur = 0;
+  1.times do |y|
+    pixels = $img.get_pixels(0, y, 10, 1)
+    pixels.each_with_index do |p,x|
+       STDERR.print "#{p}[r][c] [#{y}][#{x}] = #{p.red.to_s(16)}#{p.green.to_s(16)}#{p.blue.to_s(16)}\n"
+    end
+  end
+  save_red_channel($img, "lsb_m_coder_src_red_")
+  save_green_channel($img, "lsb_m_coder_src_green_")
+  save_blue_channel($img, "lsb_m_coder_src_blue_")
+  save_combine_channel($img, "lsb_m_coder_src_comb_")
+  img_tmp = $img.clone
+  $img.rows.times do |y|
+    pixels = img_tmp.get_pixels(0, y, $img.columns, 1)
+    pixels.each_with_index do |p,x|
+      _local_rate = (_local_rate - 1 + $rate) % $rate
+      if (cur < _write && _local_rate == 0)
+        rand_num_r = rand() > 0.5 ? 1 : 0
+        rand_num_g = rand() > 0.5 ? 1 : 0
+        rand_num_b = rand() > 0.5 ? 1 : 0
+        p.red=(rand_num_r == 1 ? (p.red + 1) % $mask : (p.red - 1 + $mask) % $mask)
+        p.green=(rand_num_g == 1 ? (p.green + 1) % $mask : (p.green - 1 + $mask) % $mask)
+        p.blue=(rand_num_b == 1 ? (p.blue + 1) % $mask : (p.blue - 1 + $mask) % $mask)
+        img_tmp.pixel_color(x, y, p)
+        cur = cur + 1
+      end
+    end
+  #    img_tmp.store_pixels(0, y, $columns, 1, pixels)
+  end
+  img_tmp.write(prefix + "_" + $image)
+  save_red_channel(img_tmp, "lsb_m_coder_#{prefix}_red_")
+  save_green_channel(img_tmp, "lsb_m_coder_#{prefix}_green_")
+  save_blue_channel(img_tmp, "lsb_m_coder_#{prefix}_blue_")
+  save_combine_channel(img_tmp, "lsb_m_coder_#{prefix}_comb_")
+end
+
 def lsb_r_decode(fname)
   return if $img.nil?
   print "LSB decode for #{fname}\n"
@@ -166,7 +209,8 @@ unless ARGV.empty? || ARGV.length < 2
   if ARGV[0] == 'coder'
     $image = ARGV[1]
     show_info($image)
-    lsb_r_code($image, "code")
+    lsb_r_code($image, "code_r")
+    lsb_m_code($image, "code_m")
   elsif ARGV[0] == 'decoder'
     $image = ARGV[1]
     show_info($image)

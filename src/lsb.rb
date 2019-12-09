@@ -112,7 +112,7 @@ def save_combine_channel(_image, prefix)
   img_tmp.write(prefix+$image)
 end
 
-def lsb_code(fname, prefix)
+def lsb_r_code(fname, prefix)
   return if $img.nil?
   print "LSB code for #{fname}\n"
   _write = $pix * $percent;
@@ -123,10 +123,10 @@ def lsb_code(fname, prefix)
        STDERR.print "#{p}[r][c] [#{y}][#{x}] = #{p.red.to_s(16)}#{p.green.to_s(16)}#{p.blue.to_s(16)}\n"
     end
   end
-  save_red_channel($img, "lsb_coder_src_red_")
-  save_green_channel($img, "lsb_coder_src_green_")
-  save_blue_channel($img, "lsb_coder_src_blue_")
-  save_combine_channel($img, "lsb_coder_src_comb_")
+  save_red_channel($img, "lsb_r_coder_src_red_")
+  save_green_channel($img, "lsb_r_coder_src_green_")
+  save_blue_channel($img, "lsb_r_coder_src_blue_")
+  save_combine_channel($img, "lsb_r_coder_src_comb_")
   img_tmp = $img.clone
   $img.rows.times do |y|
     pixels = img_tmp.get_pixels(0, y, $img.columns, 1)
@@ -145,10 +145,10 @@ def lsb_code(fname, prefix)
   #    img_tmp.store_pixels(0, y, $columns, 1, pixels)
   end
   img_tmp.write(prefix + "_" + $image)
-  save_red_channel(img_tmp, "lsb_coder_#{prefix}_red_")
-  save_green_channel(img_tmp, "lsb_coder_#{prefix}_green_")
-  save_blue_channel(img_tmp, "lsb_coder_#{prefix}_blue_")
-  save_combine_channel(img_tmp, "lsb_coder_#{prefix}_comb_")
+  save_red_channel(img_tmp, "lsb_r_coder_#{prefix}_red_")
+  save_green_channel(img_tmp, "lsb_r_coder_#{prefix}_green_")
+  save_blue_channel(img_tmp, "lsb_r_coder_#{prefix}_blue_")
+  save_combine_channel(img_tmp, "lsb_r_coder_#{prefix}_comb_")
 end
 
 def lsb_decode(fname)
@@ -166,7 +166,7 @@ unless ARGV.empty? || ARGV.length < 2
   if ARGV[0] == 'coder'
     $image = ARGV[1]
     show_info($image)
-    lsb_code($image, "code")
+    lsb_r_code($image, "code")
   elsif ARGV[0] == 'decoder'
     $image = ARGV[1]
     show_info($image)

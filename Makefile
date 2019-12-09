@@ -19,6 +19,7 @@ bins: $(DIRS) $(OBJ)
 	$(CC) $(OBJ) $(CFLAGS) -o $(BIN_DIR)/mip $(LIB) $(INCLUDES)
 	@test -e ${PWD}/bin/mtf || (chmod +x ${PWD}/src/mtf.rb && ln -s ${PWD}/src/mtf.rb ${PWD}/bin/mtf)
 	@test -e ${PWD}/bin/bwt || (chmod +x ${PWD}/src/bwt.rb && ln -s ${PWD}/src/bwt.rb ${PWD}/bin/bwt)
+	@test -e ${PWD}/bin/lsb || (chmod +x ${PWD}/src/bwt.rb && ln -s ${PWD}/src/lsb.rb ${PWD}/bin/lsb)
 
 $(OBJ_DIR):
 	$(if ifeq test -d "$(OBJ_DIR)" 0, @mkdir -p $(OBJ_DIR))

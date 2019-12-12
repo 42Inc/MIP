@@ -190,21 +190,30 @@ def lsb_m_code(fname, prefix)
       _local_rate = (_local_rate - 1 + $rate) % $rate
       if (cur < _write && _local_rate == 0)
         rand_num_r = rand() > 0.5 ? 1 : 0
-        p.red=(rand_num_r == 1 ? (p.red + 1) % $mask : (p.red - 1 + $mask) % $mask)
+        rand_bit_r = rand() > 0.5 ? 1 : 0
+        unless (rand_bit_r == (p.red & 0x1))
+          p.red=(rand_num_r == 1 ? (p.red + 1) % $mask : (p.red - 1 + $mask) % $mask)
+        end
         cur = cur + 1
         flag = flag + 1;
       end
       _local_rate = (_local_rate - 1 + $rate) % $rate
       if (cur < _write && _local_rate == 0)
         rand_num_g = rand() > 0.5 ? 1 : 0
-        p.green=(rand_num_g == 1 ? (p.green + 1) % $mask : (p.green - 1 + $mask) % $mask)
+        rand_bit_g = rand() > 0.5 ? 1 : 0
+        unless (rand_bit_g == (p.green & 0x1))
+          p.green=(rand_num_g == 1 ? (p.green + 1) % $mask : (p.green - 1 + $mask) % $mask)
+        end
         cur = cur + 1
         flag = flag + 1;
       end
       _local_rate = (_local_rate - 1 + $rate) % $rate
       if (cur < _write && _local_rate == 0)
         rand_num_b = rand() > 0.5 ? 1 : 0
-        p.blue=(rand_num_b == 1 ? (p.blue + 1) % $mask : (p.blue - 1 + $mask) % $mask)
+        rand_bit_b = rand() > 0.5 ? 1 : 0
+        unless (rand_bit_b == (p.blue & 0x1))
+          p.blue=(rand_num_b == 1 ? (p.blue + 1) % $mask : (p.blue - 1 + $mask) % $mask)
+        end
         cur = cur + 1
         flag = flag + 1;
       end
@@ -217,6 +226,23 @@ def lsb_m_code(fname, prefix)
   save_green_channel(img_tmp, "lsb_m_coder_#{prefix}_green_")
   save_blue_channel(img_tmp, "lsb_m_coder_#{prefix}_blue_")
   save_combine_channel(img_tmp, "lsb_m_coder_#{prefix}_comb_")
+end
+
+def lsb_h_code(fname, prefix)
+  save_red_channel($img, "lsb_h_coder_src_red_")
+  save_green_channel($img, "lsb_h_coder_src_green_")
+  save_blue_channel($img, "lsb_h_coder_src_blue_")
+  save_combine_channel($img, "lsb_h_coder_src_comb_")
+  matrix = [
+    1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1,
+    0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1,
+    0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1,
+    0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1
+  ]
+  save_red_channel(img_tmp, "lsb_h_coder_#{prefix}_red_")
+  save_green_channel(img_tmp, "lsb_h_coder_#{prefix}_green_")
+  save_blue_channel(img_tmp, "lsb_h_coder_#{prefix}_blue_")
+  save_combine_channel(img_tmp, "lsb_h_coder_#{prefix}_comb_")
 end
 
 def lsb_r_decode(fname)

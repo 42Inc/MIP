@@ -1,0 +1,43 @@
+#include <stdio.h>
+#include <stdlib.h>
+#define CHECK(val,min,max) (min <= val && val < max)
+
+int main(int argc, char **argv) {
+  const double P_write = 0.3;
+  const double P_read = 0.3;
+  const int P_read_count = 2;
+  double a = 1.0;
+  long int size = 33;
+  long int i = 0;
+  long int j = 0;
+  double gen = 0.0;
+  long int read = 0;
+  double mean = 0.0;
+  long int repeat = 1000000;
+  double max_a = 1;
+  long int success = 0;
+  for (a = 1; a <= max_a; a+=0.1) {
+    mean = 0.0;
+    if ((P_write + a * P_read_count * P_read) > 1)
+      break;
+    for (i = 0; i < repeat; ++i) {
+      read = 0;
+      for (j = 0; j < size; ++j) {
+        gen = ((double)(rand() % 1000)) / 1000;
+        if (CHECK(gen, 0, P_write)) {
+          break;
+        } else if (CHECK(gen, P_write, P_write + P_read_count * P_read * a)) {
+          ++read;
+          continue;
+        }
+      }
+      if (j == read)
+        ++success;
+      mean += read;
+//      fprintf(stdout, "[1][P_write: %lf | P_read: %lf | a: %lf | read: %ld | mean: %lf]\n", P_write, P_read, a, read, mean);
+    }
+    mean = ((double)mean) / repeat;
+    fprintf(stdout, "[P_write: %lf | P_read: %lf | P_read_count: %d | a: %lf | state: %ld/%ld | mean: %lf]\n", P_write, P_read, P_read_count, a, success, repeat, mean);
+  }
+  return 0;
+}

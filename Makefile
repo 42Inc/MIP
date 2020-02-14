@@ -15,8 +15,9 @@ OUTERS := *.code *.decode
 .PHONY: all bins clean rebuild
 all: bins
 
-bins: $(DIRS) $(OBJ)
+bins: $(DIRS) $(OBJ) $(OBJ_DIR)/mip_1.o
 	$(CC) $(OBJ) $(CFLAGS) -o $(BIN_DIR)/mip $(LIB) $(INCLUDES)
+	$(CC) $(OBJ_DIR)/mip_1.o -o $(BIN_DIR)/mip_1 $(LIB) $(INCLUDES)
 	@test -e ${PWD}/bin/mtf || (chmod +x ${PWD}/src/mtf.rb && ln -s ${PWD}/src/mtf.rb ${PWD}/bin/mtf)
 	@test -e ${PWD}/bin/bwt || (chmod +x ${PWD}/src/bwt.rb && ln -s ${PWD}/src/bwt.rb ${PWD}/bin/bwt)
 	@test -e ${PWD}/bin/lsb || (chmod +x ${PWD}/src/bwt.rb && ln -s ${PWD}/src/lsb.rb ${PWD}/bin/lsb)
@@ -28,6 +29,7 @@ $(BIN_DIR):
 	$(if ifeq test -d "$(BIN_DIR)" 0, @mkdir -p $(BIN_DIR))
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
+	echo $<
 	$(CC) $(OFLAGS) -c $< -o $@ $(INCLUDES)
 
 clean:

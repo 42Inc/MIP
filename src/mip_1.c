@@ -1,11 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
+
 #define CHECK(val,min,max) (min <= val && val < max)
 
 int main(int argc, char **argv) {
-  const double P_write = 0.3;
+  const double P_write = 0.1;
   const double P_read = 0.3;
-  const int P_read_count = 2;
+  int P_read_count = argv[1] ? atoi(argv[1]) : 2;
   double a = 1.0;
   long int size = 33;
   long int i = 0;
@@ -14,8 +16,9 @@ int main(int argc, char **argv) {
   long int read = 0;
   double mean = 0.0;
   long int repeat = 1000000;
-  double max_a = 1;
+  double max_a = 20;
   long int success = 0;
+  srand(time(NULL));
   for (a = 1; a <= max_a; a+=0.1) {
     mean = 0.0;
     if ((P_write + a * P_read_count * P_read) > 1)
@@ -31,13 +34,14 @@ int main(int argc, char **argv) {
           continue;
         }
       }
-      if (j == read)
+      if (j == size)
         ++success;
       mean += read;
 //      fprintf(stdout, "[1][P_write: %lf | P_read: %lf | a: %lf | read: %ld | mean: %lf]\n", P_write, P_read, a, read, mean);
     }
     mean = ((double)mean) / repeat;
     fprintf(stdout, "[P_write: %lf | P_read: %lf | P_read_count: %d | a: %lf | state: %ld/%ld | mean: %lf]\n", P_write, P_read, P_read_count, a, success, repeat, mean);
+    fprintf(stderr, "%lf\t%ld\n",a,success);
   }
   return 0;
 }

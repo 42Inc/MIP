@@ -5,8 +5,8 @@
 #define CHECK(val,min,max) (min <= val && val < max)
 
 int main(int argc, char **argv) {
-  const double P_write = 0.1;
-  const double P_read = 0.3;
+  const double P_write = 0.01;
+  const double P_read = P_write;
   int P_read_count = argv[1] ? atoi(argv[1]) : 2;
   double a = 1.0;
   long int size = 33;
@@ -21,15 +21,17 @@ int main(int argc, char **argv) {
   srand(time(NULL));
   for (a = 1; a <= max_a; a+=0.1) {
     mean = 0.0;
+    success = 0;
     if ((P_write + a * P_read_count * P_read) > 1)
       break;
     for (i = 0; i < repeat; ++i) {
       read = 0;
       for (j = 0; j < size; ++j) {
-        gen = ((double)(rand() % 1000)) / 1000;
+        gen = ((double)(rand() % 10000)) / 10000;
+//        fprintf(stdout, "[1][gen: %lf | a: %lf | P_write: %lf | Max: %lf | check: %ld]\n", gen, a, P_write, (P_write + P_read_count * P_read * a), CHECK(gen, P_write, (P_write + P_read_count * P_read * a)));
         if (CHECK(gen, 0, P_write)) {
           break;
-        } else if (CHECK(gen, P_write, P_write + P_read_count * P_read * a)) {
+        } else if (CHECK(gen, P_write, (P_write + P_read_count * P_read * a))) {
           ++read;
           continue;
         }

@@ -4,66 +4,65 @@
 #include <stdlib.h>
 #include <time.h>
 
-const int experiment = 50;					// Amount of tries in one experiment
-const int measuring = 1000;					// Amount of measurings in one try
-const int alphabet = 26;						// Length of the given alphabet (Default: Eng - 26 letters)
+const int exp_size = 50;
+const int symbols = 26;
 
-void readersCall(float readersData[2][experiment]) {
-	int firstReaderAvg;
-	int secondReaderAvg;
-	int firstReader;
-	int secondReader;
-	int GodBlessRNG;
+void readersCall(float readersData[2][exp_size]) {
+	int readerFthread_mean;
+	int readerSthread_mean;
+	int fthread_local;
+	int sthread_local;
+	int ps_random;
 
-	for (int attempt = 1; attempt <= experiment+1; attempt++) {
-		firstReaderAvg = 0;						// Average amount of read letters for the first reader's stream
-		secondReaderAvg = 0;					// Average amount of read letters for the second reader's stream
-		for (int cnt = 1; cnt <= measuring+1; cnt++) {
-			firstReader = 0;						// Amount of read letters for the first reader's stream on the current measuring
-			secondReader = 0;						// Amount of read letters for the second reader's stream on the current measuring
-			GodBlessRNG = 1;						// RND number for deciding when we need to end current measuring
-			while (GodBlessRNG != 0) {
-				GodBlessRNG = rand() % 100;
-				if (((1 <= GodBlessRNG) && (GodBlessRNG < attempt)) && (firstReader + 1 <= alphabet)) {
-					firstReader += 1;
-				} else if (((attempt <= GodBlessRNG) && (GodBlessRNG < (2 * attempt))) && (secondReader + 1 <= alphabet)) {
-					secondReader += 1;
+	for (int attempt = 1; attempt <= exp_size+1; attempt++) {
+		readerFthread_mean = 0;
+		readerSthread_mean = 0;
+		for (int cnt = 1; cnt <= 1001; cnt++) {
+			fthread_local = 0;
+			sthread_local = 0;
+			ps_random = 1;
+			while (ps_random != 0) {
+				ps_random = rand() % 100;
+				if (((1 <= ps_random) && (ps_random < attempt)) && (fthread_local + 1 <= symbols)) {
+					fthread_local += 1;
+				} else if (((attempt <= ps_random) && (ps_random < (2 * attempt))) && (sthread_local + 1 <= symbols)) {
+					sthread_local += 1;
 				}
 			}
-			firstReaderAvg += firstReader;
-			secondReaderAvg += secondReader;
+			readerFthread_mean += fthread_local;
+			readerSthread_mean += sthread_local;
 		}
-		readersData[0][attempt - 1] = firstReaderAvg / 1000;
-		readersData[1][attempt - 1] = secondReaderAvg / 1000;
+		readersData[0][attempt - 1] = readerFthread_mean / 1000;
+		readersData[1][attempt - 1] = readerSthread_mean / 1000;
 	}
 }
 
-void dataSave(float data[2][experiment]) {
-	FILE* firstReader;
-	FILE* secondReader;
-	char* firstFile = "data/fr.dat";
-	char* secondFile = "data/sr.dat";
+void dataSave(float data[2][exp_size]) {
+	FILE* FReader;
+	FILE* SReader;
+	char* FFile = "data/fr.dat";
+	char* SFile = "data/sr.dat";
 
-	firstReader = fopen(firstFile	,"w+");
-	if (firstReader == NULL) {
+	FReader = fopen(FFile	,"w+");
+	if (FReader == NULL) {
 		exit(EXIT_FAILURE);
 	}
-	for (int i = 0; i < experiment; ++i)
-		fprintf(firstReader, "%d\t%f\n", i, data[0][i]);
-	fclose(firstReader);
+	for (int i = 0; i < exp_size; ++i)
+		fprintf(FReader, "%d\t%f\n", i, data[0][i]);
+	fclose(FReader);
 
-	secondReader = fopen(secondFile,"w+");
-	if (secondReader == NULL) {
+	SReader = fopen(SFile,"w+");
+	if (SReader == NULL) {
 		exit(EXIT_FAILURE);
 	}
-	for (int i = 0; i < experiment; ++i)
-		fprintf(secondReader, "%d\t%f\n", i, data[1][i]);
-	fclose(secondReader);
+	for (int i = 0; i < exp_size; ++i)
+		fprintf(SReader, "%d\t%f\n", i, data[1][i]);
+	fclose(SReader);
 }
 
 int main(int argc, char const *argv[]) {
 	srand(time(NULL));
-	float data[2][experiment];
+	float data[2][exp_size];
 	readersCall(data);
 	dataSave(data);
 	return EXIT_SUCCESS;

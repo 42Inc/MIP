@@ -48,8 +48,6 @@ int main(int argc, char **argv) {
      * 1 - обрабатывает элемент
      */
     int state;
-    /* Общее время работы этапа над элементами */
-    int work_time;
   } pipeline_state_t;
 
   pipeline_state_t *pipeline_status = NULL;
@@ -123,7 +121,6 @@ int main(int argc, char **argv) {
   for (i = 0; i < pipeline_length; ++i) {
     pipeline_status[i].ttl = -1;
     pipeline_status[i].state = 0;
-    pipeline_status[i].work_time = 0;
   }
 
   /* Бесконечный цикл */

@@ -9,8 +9,6 @@ int slowestPipe = 0;
 int pipeSize;
 
 void syncPipeCalc(int *syncPipeTime, int *pipesTiming) {
-	for (int i = 0; i < pipeSize; ++i)
-		slowestPipe = pipesTiming[i] > slowestPipe ? pipesTiming[i] : slowestPipe;
 	*syncPipeTime = slowestPipe * (pipeSize + inputData - 1);
 }
 

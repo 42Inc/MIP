@@ -13,14 +13,14 @@ int main(int argc, char **argv) {
 
   /* Границы времени выполнения этапа конвейера */
   int min_time = 1;
-  int max_time = 6;
+  int max_time = 50;
 
   /* Количество этапов конвейра */
   int pipeline_length = argv[1] ? atoi(argv[1]) : 5;
   if (pipeline_length <= 0) return 253;
 
   /* Количество элементов для обработки */
-  long int items_count = 3;
+  long int items_count = 100000;
   /* Оставшиеся элементы */
   long int items_left = items_count;
   /* Обработанные элементы */
@@ -54,13 +54,11 @@ int main(int argc, char **argv) {
 
   if (!pipeline_times) return 255;
   // srand(time(0));
-  printf("Times:\n");
   for (i = 0; i < pipeline_length; ++i) {
     pipeline_times[i] = rand() % (max_time - min_time) + min_time;
     slowly_pipeline_step_time = pipeline_times[i] > slowly_pipeline_step_time
                                     ? pipeline_times[i]
                                     : slowly_pipeline_step_time;
-    printf("Step %02d: %ld\n", i, pipeline_times[i]);
   }
   /*
    * a b c d e

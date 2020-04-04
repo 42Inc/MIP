@@ -2,49 +2,42 @@
 #include <stdlib.h>
 #include <time.h>
 
-const int N = 11;
+const int MIN_TIME = 1;
+const int MAX_TIME = 50;
+const int inputData = 100000;
+int slowestPipe = 0;
+int pipeSize;
 
-int main(){
-	srand(time(0));
-	int t = 0, ar = 100000;
-	int Conv[N];
-	for (int i = 0; i < N; i++) {
-		Conv[i] = 0;
+void syncPipeCalc(int *syncPipeTime, int *pipesTiming) {
+	for (int i = 0; i < pipeSize; ++i)
+		slowestPipe = pipesTiming[i] > slowestPipe ? pipesTiming[i] : slowestPipe;
+	*syncPipeTime = slowestPipe * (pipeSize + inputData - 1);
+}
+
+void asyncPipeCalc(int *asyncPipeTime, int *pipesTiming) {
+	for (int i = 0; i < pipeSize; ++i)
+		*asyncPipeTime += pipesTiming[i];
+	*asyncPipeTime += slowestPipe * (inputData - 1);
+}
+
+int main(int argc, char const *argv[]) {
+  pipeSize = argv[1] ? atoi(argv[1]) : 5;
+  if (pipeSize <= 0) return 253;
+
+	int syncPipeTime = 0;
+  int asyncPipeTime = 0;
+
+  int *pipesTiming = (int*)malloc(pipeSize * sizeof(int));
+	for (int i = 0; i < pipeSize; ++i) {
+		pipesTiming[i] = rand() % (MAX_TIME - MIN_TIME) + MIN_TIME;
+    slowestPipe = pipesTiming[i] > slowestPipe
+	                              ? pipesTiming[i]
+	                              : slowestPipe;
 	}
-	int buf[N+1];
-	for (int i = 0; i < N+1; i++) {
-		buf[i] = 0;
-	}
-	int f = 0;
-	while (f != 1) {
-		if(buf[0] == 0 && ar > 0){
-			buf[0] = rand()%8 +1;
-			--ar;
-		}
-		for (int i = 0; i < N; ++i) {
-			if(buf[i] != 0 && Conv[i] == 0){
-				Conv[i] = buf[i];
-				buf[i] = 0;
-				--Conv[i];
-			} else if(Conv[i] != 0){
-				--Conv[i];
-				if(Conv[i] == 0){
-					buf[i+1] = rand()%8 + 1;
-				}
-			}
-		}
-		if(ar == 0){
-			for(int i = 0; i < N; ++i){
-				if(Conv[i] != 0 ){
-					f = 0;
-					break;
-				} else {
-					f = 1;
-				}
-			}
-		}
-		++t;
-	}
-	printf("%d\n", t); //количество тактов return 0; }
-	return EXIT_SUCCESS;
+	syncPipeCalc(&syncPipeTime, pipesTiming);
+	asyncPipeCalc(&asyncPipeTime, pipesTiming);
+
+  printf("%d\t%d\t%d\n", pipeSize, syncPipeTime, asyncPipeTime);
+
+  return EXIT_SUCCESS;
 }

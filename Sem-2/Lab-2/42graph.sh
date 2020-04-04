@@ -19,5 +19,5 @@ set ytics font "Arial, 12"
 set rmargin 4
 set tmargin 2
 
-plot "data/log.dat" using 1:2 title "Синхронный" with linespoints ls 1,\
-     "data/log.dat" using 1:3 title "Асинхронный" with linespoints ls 2
+plot "data/log.dat" using 1:2 title "Синхронный. n = 100000" with linespoints ls 1,\
+     "data/log.dat" using 1:3 title "Асинхронный. n = 100000" with linespoints ls 2

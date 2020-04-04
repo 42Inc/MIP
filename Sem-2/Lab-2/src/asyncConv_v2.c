@@ -3,8 +3,8 @@
 #include <time.h>
 
 const int MIN_TIME = 1;
-const int MAX_TIME = 50;
-const int inputData = 100000;
+const int MAX_TIME = 70;
+const int inputData = 1000000;
 int slowestPipe = 0;
 int pipeSize;
 
@@ -21,6 +21,7 @@ void asyncPipeCalc(int *asyncPipeTime, int *pipesTiming) {
 }
 
 int main(int argc, char const *argv[]) {
+	srand(time(NULL));
   pipeSize = argv[1] ? atoi(argv[1]) : 5;
   if (pipeSize <= 0) return 253;
 

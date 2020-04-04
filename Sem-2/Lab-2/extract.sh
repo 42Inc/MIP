@@ -5,5 +5,5 @@ if [[ $# < 2 ]];then
 fi
 rm -f $2
 for (( i=2; i <= $MAX_STEPS; ++i )); do
-  $1 $i 2>> $2
+  $1 $i >> $2
 done

@@ -71,7 +71,7 @@ int main(int argc, char **argv) {
   /* Расчет времени выполнения синхронного конвейера */
   sync_pipeline_time =
       slowly_pipeline_step_time * (pipeline_length + items_count - 1);
-  printf("Sync pipeline time: %ld\n", sync_pipeline_time);
+  fprintf(stdout, "Sync pipeline time: %ld\n", sync_pipeline_time);
 
   /*
    * Паттерн времен. 5-ти ступенчатый конвейер с последовательным выполнением
@@ -216,7 +216,7 @@ int main(int argc, char **argv) {
     ++tact;
   }
 
-  printf("Practical async pipeline time: %ld\n", async_pipeline_time);
+  fprintf(stdout, "Practical async pipeline time: %ld\n", async_pipeline_time);
   /*
    * Теоретический расчет времени выполнения асинхронного конвейера на основе
    * аналитики
@@ -226,8 +226,9 @@ int main(int argc, char **argv) {
     async_pipeline_time += pipeline_times[i];
   }
   async_pipeline_time += slowly_pipeline_step_time * (items_count - 1);
-  printf("Theoretical async pipeline time: %ld\n", async_pipeline_time);
+  fprintf(stdout, "Theoretical async pipeline time: %ld\n", async_pipeline_time);
   diff_pipeline_time = sync_pipeline_time - async_pipeline_time;
-  printf("Time diff: %ld\n", diff_pipeline_time);
+  fprintf(stdout, "Time diff: %ld\n", diff_pipeline_time);
+  fprintf(stderr, "%ld\t%ld\t%ld\n", pipeline_length, sync_pipeline_time, async_pipeline_time);
   return 0;
 }

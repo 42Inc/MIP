@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
 MIN_TIME = 1
-MAX_TIME = 50
-inputData = 100000
+MAX_TIME = 5
+inputData = 20
 
 def syncPipeCalc(pipeSize, pipesTiming, slowestPipe):
 	syncPipeTime = slowestPipe * (pipeSize + inputData - 1)
@@ -17,11 +17,10 @@ def asyncPipeCalc(pipeSize, pipesTiming, slowestPipe):
 
 def drawGraph(y_arr):
 	x_arr = [cnt for cnt in range(2,22,2)]
-	plt.plot(x_arr, y_arr[0], label="Sync Pipeline")
-	plt.plot(x_arr, y_arr[1], label="Async Pipeline")
-	# plt.axis([1, 11, 3000000, 7000000])
-	plt.ylabel("Pipeline's tacts")
-	plt.xlabel("Pipeline's stages")
+	plt.plot(x_arr, y_arr[0], label="Синхронный конвейр")
+	plt.plot(x_arr, y_arr[1], label="Асинхронный конвейр")
+	plt.ylabel("Кол-во тактов")
+	plt.xlabel("Кол-во этапов")
 	plt.legend()
 	plt.show()
 

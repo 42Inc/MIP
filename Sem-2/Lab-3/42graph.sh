@@ -11,7 +11,7 @@ set grid
 set mytics
 set mxtics
 set format y "%.0f"
-set xlabel "Amount of graph's vertexes" font "Arial, 16"
+set xlabel "Graph's vertices" font "Arial, 16"
 set format x "%.0f"
 set ylabel "Estimated time" font "Arial, 16"
 set xtics font "Arial, 12"

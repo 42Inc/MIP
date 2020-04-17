@@ -2,7 +2,7 @@
 
 filePath = "data/graph_10v.dat"		# Output file for generated graph
 citiesNum = 10						# Amount of cities (vertices) to generate paths among them
-isCon = 50							# Probability to generate a connection between two cities.
+isCon = 100							# Probability to generate a connection between two cities.
 									# The higher this variable then more variants for
 									# TSP will be calculated
 

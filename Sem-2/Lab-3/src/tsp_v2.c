@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/time.h>
 #include <time.h>
 
 /*
@@ -11,7 +12,10 @@
  * Допущения:
  * Граф считать полносвязным
  */
+
 #define LOG_FILE 0
+#define PRINT_WAYS 0
+
 void SWAP(int* x, int* y) {
   int tmp = *x;
   *x = *y;
@@ -20,6 +24,12 @@ void SWAP(int* x, int* y) {
 
 static FILE* logger = NULL;
 char* log_filename = "v2.log";
+
+double wtime() {
+  struct timeval t;
+  gettimeofday(&t, NULL);
+  return (double)t.tv_sec + (double)t.tv_usec * 1E-6;
+}
 
 long int factorial(long int a) {
   long int i = 0;
@@ -71,7 +81,7 @@ int get_next_permutation(int* array, int start, int end) {
 
 /* http://www.lib.tpu.ru/fulltext/v/Bulletin_TPU/2004/v307/i6/03.pdf */
 /* Или "Как получить лексикографическую перестановку по её индексу" */
-int get_permutation_by_index(int* array, int start, int end, int index,
+int get_permutation_by_index(int* array, int start, int end, long int index,
                              int* res) {
   long int k = 0;
   long int t = 1;
@@ -96,8 +106,8 @@ int get_permutation_by_index(int* array, int start, int end, int index,
   return 0;
 }
 
-/* Метод полного перебора. Возвращает путь */
-int* brute_force(int** matrix, int n) {
+/* Метод полного перебора. Возвращает путь и индекс */
+int* brute_force(int** matrix, int n, long int* id) {
   int i = 0;
   int j = 0;
   /* Номер пути */
@@ -136,12 +146,18 @@ int* brute_force(int** matrix, int n) {
   memcpy(way, start_way, (n + 1) * sizeof(int));
   memcpy(res_way, start_way, (n + 1) * sizeof(int));
 
+#if PRINT_WAYS == 1
   fprintf(logger, "Start way:\n");
+#endif
   for (i = 0; i <= n; ++i) {
     start_way[i] = i % n;
+#if PRINT_WAYS == 1
     fprintf(logger, "%d ", start_way[i]);
+#endif
   }
+#if PRINT_WAYS == 1
   fprintf(logger, "\n");
+#endif
 
   if (n == 2) return way;
 
@@ -152,14 +168,18 @@ int* brute_force(int** matrix, int n) {
    * Вывод минимальной перестановки по её индексу
    */
   do {
+#if PRINT_WAYS == 1
     fprintf(logger, "Way %ld [ ", way_index);
     for (i = 0; i <= n; ++i) {
       fprintf(logger, "%d ", way[i]);
     }
     fprintf(logger, "]\n");
+#endif
     way_len = get_way_len(matrix, way, n);
-    fprintf(logger, "Way Len - %ld", way_len);
+#if PRINT_WAYS == 1
+    fprintf(logger, "Way Len : %ld", way_len);
     fprintf(logger, "\n");
+#endif
     if (way_len < min_way_len) {
       min_way_len = way_len;
       min_way_index = way_index;
@@ -170,13 +190,16 @@ int* brute_force(int** matrix, int n) {
   if (get_permutation_by_index(start_way, 1, n - 1, min_way_index, res_way)) {
     return NULL;
   }
+  *id = min_way_index;
+#if PRINT_WAYS == 1
   fprintf(logger, "Min Way %ld [ ", min_way_index);
   for (i = 0; i <= n; ++i) {
     fprintf(logger, "%d ", res_way[i]);
   }
   fprintf(logger, "]\n");
-  fprintf(logger, "Min Way Len - %ld", min_way_len);
+  fprintf(logger, "Min Way Len : %ld", min_way_len);
   fprintf(logger, "\n");
+#endif
   free(start_way);
   free(way);
   return res_way;
@@ -189,8 +212,21 @@ int main(int argc, char** argv) {
   int i = 0;
   int j = 0;
 
+  long int way_index = 0;
+
   char* filename = "matrix.dat";
   FILE* fd = NULL;
+
+  double time = 0;
+
+  /* Размер матрицы - по умолчанию 5 */
+  int n = argv[1] ? atoi(argv[1]) : 5;
+  /* Если передан файл */
+  if (argv[2]) filename = argv[2];
+
+  /* Матрица */
+  int** matrix = NULL;
+  int* brute_way = NULL;
 
 /* Инициализация логгера */
 #if LOG_FILE == 1
@@ -200,14 +236,6 @@ int main(int argc, char** argv) {
 #else
   logger = stderr;
 #endif
-  /* Размер матрицы - по умолчанию 5 */
-  int n = argv[1] ? atoi(argv[1]) : 5;
-  /* Если передан файл */
-  if (argv[2]) filename = argv[2];
-
-  /* Матрица */
-  int** matrix = NULL;
-  int* brute_way = NULL;
 
   /* Выделение памяти под матрицу */
   matrix = (int**)malloc(n * sizeof(int*));
@@ -242,19 +270,21 @@ int main(int argc, char** argv) {
     for (j = 0; j < n; ++j) fprintf(stderr, "%d ", matrix[i][j]);
     fprintf(stderr, "\n");
   }
-
-  brute_way = brute_force(matrix, n);
+  time = wtime();
+  brute_way = brute_force(matrix, n, &way_index);
+  time = wtime() - time;
   if (!brute_way) {
     return 252;
   }
 
-  fprintf(logger, "Res brute Min Way [ ");
+  fprintf(stderr, "Res brute Min Way %ld [ ", way_index);
   for (i = 0; i <= n; ++i) {
-    fprintf(logger, "%d ", brute_way[i]);
+    fprintf(stderr, "%d ", brute_way[i]);
   }
-  fprintf(logger, "]\n");
-  fprintf(logger, "Res brute Way Len - %ld", get_way_len(matrix, brute_way, n));
-  fprintf(logger, "\n");
+  fprintf(stderr, "]\n");
+  fprintf(stderr, "Res brute Way Len : %ld", get_way_len(matrix, brute_way, n));
+  fprintf(stderr, "\n");
+  fprintf(stderr, "Brute time : %lf\n", time);
   free(brute_way);
   return 0;
 }

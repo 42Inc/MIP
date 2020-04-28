@@ -34,9 +34,9 @@ double wtime() {
   return (double)t.tv_sec + (double)t.tv_usec * 1E-6;
 }
 
-long int factorial(long int a) {
-  long int i = 0;
-  long int k = 1;
+unsigned long long int factorial(long long int a) {
+  unsigned long long int i = 0;
+  unsigned long long int k = 1;
   if (a == 0 || a == 1) {
     return k;
   } else if (a > 0) {
@@ -110,12 +110,12 @@ int get_next_permutation(int* array, int start, int end) {
 /* Или "Как получить лексикографическую перестановку по её индексу" */
 int get_permutation_by_index(int* array, int start, int end, long int index,
                              int* res) {
-  long int k = 0;
-  long int t = 1;
-  long int i = 0;
   int size = end - start + 1;
   int* a = NULL;
-  long int tmp = 0;
+  unsigned long long int k = 0;
+  unsigned long long int t = 1;
+  unsigned long long int i = 0;
+  unsigned long long int tmp = 0;
   if (size <= 0 || start < 0 || index < 0) return 1;
   a = malloc(size * sizeof(int));
   if (!a) return 1;

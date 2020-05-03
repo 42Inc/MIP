@@ -1,5 +1,5 @@
 CC := gcc
-STD := -std=c99 -lm
+STD := -std=c99 -lm -Wall
 DEBUG := -g3
 OBJ_PATH := ./obj
 SRC_PATH := ./src

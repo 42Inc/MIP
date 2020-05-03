@@ -92,7 +92,6 @@ int get_next_permutation(int* array, int start, int end) {
   int j = 0;
   int size = end - start + 1;
   int* a = NULL;
-  int tmp = 0;
   if (size <= 0 || start < 0) return 1;
   a = array + start;
   i = size;
@@ -143,7 +142,6 @@ int get_permutation_by_index(int* array, int start, int end, long int index,
 /* Метод полного перебора. Возвращает путь и индекс */
 int* brute_force(int* matrix, int n, long int* id) {
   int i = 0;
-  int j = 0;
   /* Номер пути */
   long int way_index = 0;
   long int min_way_index = 0;
@@ -330,7 +328,6 @@ int* recursive_branch_and_bound(int* matrix, int size, int lb, int level,
   int rate_max = -255;
   int rate_max_i = 0;
   int rate_max_j = 0;
-  int* res = NULL;
 
   /* Копируем размер матрицы*/
   int n = size;
@@ -460,9 +457,8 @@ int* recursive_branch_and_bound(int* matrix, int size, int lb, int level,
   if (lb_left <= lb_right) {
     way[IND(step, 0, 2)] = rate_max_i;
     way[IND(step, 1, 2)] = rate_max_j;
-    if (res = recursive_branch_and_bound(matrix_left, n, low_border + lb_left,
+    if (!recursive_branch_and_bound(matrix_left, n, low_border + lb_left,
                                          level + 1, step + 1, way)) {
-    } else {
       way[IND(step, 0, 2)] = -1;
       way[IND(step, 1, 2)] = -1;
       if (!recursive_branch_and_bound(matrix_right, n, low_border + lb_right,
@@ -476,9 +472,8 @@ int* recursive_branch_and_bound(int* matrix, int size, int lb, int level,
                                     level + 1, step, way)) {
       way[IND(step, 0, 2)] = rate_max_i;
       way[IND(step, 1, 2)] = rate_max_j;
-      if (res = recursive_branch_and_bound(matrix_left, n, low_border + lb_left,
+      if (!recursive_branch_and_bound(matrix_left, n, low_border + lb_left,
                                            level + 1, step + 1, way)) {
-      } else {
         fprintf(logger, "Fail\n");
         return NULL;
       }
@@ -495,29 +490,11 @@ int* recursive_branch_and_bound(int* matrix, int size, int lb, int level,
 int* branch_and_bound(int* matrix, int size) {
   int i = 0;
   int j = 0;
-  int k = 0;
-  int col_min = __INT32_MAX__;
-  int row_min = __INT32_MAX__;
 
   /* Копируем размер матрицы, потому что он будет изменяться */
   int n = size;
-  /* Индекс заполненности пути */
-  int ways_index = 0;
-  /* Нижняя граница */
-  int low_border = 0;
   /* Верхняя граница */
   int up_border = 0;
-
-  /* Копия исходной матрицы */
-  int* matrix_c = NULL;
-  /* Матрица оценок */
-  int* matrix_temp = NULL;
-  /* Матрица путей src->dst */
-  int** ways = NULL;
-  /* Минимум по строкам */
-  int* alpha = NULL;
-  /* Минимум по столбцам */
-  int* beta = NULL;
 
   /* Путь */
   int* way = NULL;

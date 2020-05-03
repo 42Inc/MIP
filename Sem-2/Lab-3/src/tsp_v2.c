@@ -301,11 +301,6 @@ int loop_check(int* way, int step, int n) {
   int k = 0;
   int start = 0;
   int cursor = 0;
-  // printf("suspend\n");
-  // for (k = 0; k < step; ++k) {
-  // printf("%d %d\n", way[IND(k, 0, 2)], way[IND(k, 1, 2)]);
-  // }
-  // for (k = 0; k < n; ++k) {
   k = 0;
   start = k;
   cursor = start;
@@ -314,8 +309,6 @@ int loop_check(int* way, int step, int n) {
       if (cursor == way[IND(j, 0, 2)]) {
         cursor = way[IND(j, 1, 2)];
         ++k;
-        // printf("set cursor %d -> %d\n", way[IND(j, 0, 2)], way[IND(j, 1,
-        // 2)]);
       }
       if ((i > 0) & (cursor == start)) {
         if (k == n) return 0;
@@ -323,7 +316,6 @@ int loop_check(int* way, int step, int n) {
       }
     }
   }
-  // }
   return 0;
 }
 
@@ -377,18 +369,14 @@ int* recursive_branch_and_bound(int* matrix, int size, int lb, int level,
       return NULL;
     }
   }
-  /*
-   * TODO: Научить алгоритм исключать варианты, вызывающие замыкания путей при
-   * step < n
-   */
-  // if (step < n - 2) {
+
+  /* Поиск преждевременных замыканий марщрута */
   for (i = 0; i < n; ++i) {
     for (j = 0; j < n; ++j) {
       if (matrix_c[IND(i, j, n)] == 0) {
         way[IND(step, 0, 2)] = i;
         way[IND(step, 1, 2)] = j;
         if (loop_check(way, step + 1, n)) {
-          // printf("LOOOOOOOP %d %d\n", i, j);
           matrix_temp[IND(i, j, n)] = -255;
         }
         way[IND(step, 0, 2)] = -1;
@@ -396,7 +384,7 @@ int* recursive_branch_and_bound(int* matrix, int size, int lb, int level,
       }
     }
   }
-  // }
+
   /* Строим матрицу оценок */
   for (i = 0; i < n; ++i) {
     for (j = 0; j < n; ++j) {
@@ -429,17 +417,16 @@ int* recursive_branch_and_bound(int* matrix, int size, int lb, int level,
       }
     }
   }
-  if (rate_max_i == rate_max_j) {
-    // for (i = 0; i < level; ++i) fprintf(stderr, "\t");
-    // fprintf(stderr, "Rate/ub: [%d/%d] REJECT\n", rate_max_i, rate_max_j);
+
+  if (rate_max_i == rate_max_j || rate_max > lb) {
     free(matrix_right);
     free(matrix_left);
     free(matrix_temp);
     free(matrix_c);
     return NULL;
   }
+
   if (step + 1 >= n) {
-    // fprintf(stdout, "!!!! %d %d\n", rate_max_i, rate_max_j);
     way[IND(step, 0, 2)] = rate_max_i;
     way[IND(step, 1, 2)] = rate_max_j;
     free(matrix_right);
@@ -447,16 +434,6 @@ int* recursive_branch_and_bound(int* matrix, int size, int lb, int level,
     free(matrix_temp);
     free(matrix_c);
     return matrix;
-  }
-
-  if (rate_max > lb) {
-    for (i = 0; i < level; ++i) fprintf(stderr, "\t");
-    // fprintf(stderr, "Rate/ub: [%d/%d] REJECT\n", rate_max, lb);
-    free(matrix_right);
-    free(matrix_left);
-    free(matrix_temp);
-    free(matrix_c);
-    return NULL;
   }
 
   /* Формирование матриц ветвлений */
@@ -476,51 +453,15 @@ int* recursive_branch_and_bound(int* matrix, int size, int lb, int level,
   /* Правая - исключает путь */
   memcpy(matrix_right, matrix_c, n * n * sizeof(int));
   matrix_right[IND(rate_max_i, rate_max_j, n)] = -255;
-  // matrix_right[IND(rate_max_j, rate_max_i, n)] = -255;
 
   lb_left = reduction_matrix(matrix_left, n);
   lb_right = reduction_matrix(matrix_right, n);
 
-  // for (i = 0; i < step; ++i) {
-  //   for (k = 0; k < level; ++k) fprintf(stdout, "\t");
-  //   fprintf(stdout, "%d %d\n", way[IND(i, 0, 2)], way[IND(i, 1, 2)]);
-  // }
-
-  // for (i = 0; i < n; ++i) {
-  //   for (k = 0; k < level; ++k) fprintf(stdout, "\t");
-  //   for (j = 0; j < n; ++j) fprintf(stdout, "%d\t", matrix_c[IND(i, j, n)]);
-  //   fprintf(stdout, "\n");
-  // }
-  // fprintf(stdout, "temp\n");
-  // for (i = 0; i < n; ++i) {
-  //   for (k = 0; k < level; ++k) fprintf(stdout, "\t");
-  //   for (j = 0; j < n; ++j) fprintf(stdout, "%d\t", matrix_temp[IND(i, j,
-  //   n)]); fprintf(stdout, "\n");
-  // }
-  // fprintf(stdout, "ri\n");
-  // for (i = 0; i < n; ++i) {
-  //   for (k = 0; k < level; ++k) fprintf(stdout, "\t");
-  //   for (j = 0; j < n; ++j) fprintf(stdout, "%d\t", matrix_right[IND(i, j,
-  //   n)]); fprintf(stdout, "\n");
-  // }
-  // fprintf(stdout, "le\n");
-  // for (i = 0; i < n; ++i) {
-  //   for (k = 0; k < level; ++k) fprintf(stdout, "\t");
-  //   for (j = 0; j < n; ++j) fprintf(stdout, "%d\t", matrix_left[IND(i, j,
-  //   n)]); fprintf(stdout, "\n");
-  // }
-  // fprintf(stdout, "\n");
-  // for (k = 0; k < level; ++k) fprintf(stdout, "\t");
-  // fprintf(stdout, "%d %d %d\n", low_border, lb_left, lb_right);
-  // fprintf(stdout, "!! %d %d\n", rate_max_i, rate_max_j);
-  // fprintf(stdout, "\n");
-  // fprintf(stdout, "\n");
   if (lb_left <= lb_right) {
     way[IND(step, 0, 2)] = rate_max_i;
     way[IND(step, 1, 2)] = rate_max_j;
     if (res = recursive_branch_and_bound(matrix_left, n, low_border + lb_left,
                                          level + 1, step + 1, way)) {
-      // fprintf(stdout, "%d %d\n", rate_max_i, rate_max_j);
     } else {
       way[IND(step, 0, 2)] = -1;
       way[IND(step, 1, 2)] = -1;
@@ -537,9 +478,7 @@ int* recursive_branch_and_bound(int* matrix, int size, int lb, int level,
       way[IND(step, 1, 2)] = rate_max_j;
       if (res = recursive_branch_and_bound(matrix_left, n, low_border + lb_left,
                                            level + 1, step + 1, way)) {
-        // fprintf(stdout, "%d %d\n", rate_max_i, rate_max_j);
       } else {
-        
         fprintf(logger, "Fail\n");
         return NULL;
       }
@@ -609,9 +548,7 @@ int* branch_and_bound(int* matrix, int size) {
   if (!recursive_branch_and_bound(matrix, n, up_border, 0, 0, way)) {
     return NULL;
   }
-  // for (j = 0; j < n; ++j) {
-  // printf("! %d %d\n", way[IND(j, 0, 2)], way[IND(j, 1, 2)]);
-  // }
+
   for (i = 1; i < n; ++i) {
     for (j = 0; j < n; ++j) {
       if (i == 1) {

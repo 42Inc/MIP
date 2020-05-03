@@ -15,9 +15,12 @@
 
 #define LOG_FILE 0
 #define PRINT_WAYS 0
+#define SAVE_INDEX 0
 
 #define TRUE 0
 #define FALSE 1
+
+#define IND(i, j, s) (i * s + j)
 
 void SWAP(int* x, int* y) {
   int tmp = *x;
@@ -34,6 +37,7 @@ double wtime() {
   return (double)t.tv_sec + (double)t.tv_usec * 1E-6;
 }
 
+#if SAVE_INDEX == 1
 unsigned long long int factorial(long long int a) {
   unsigned long long int i = 0;
   unsigned long long int k = 1;
@@ -47,35 +51,36 @@ unsigned long long int factorial(long long int a) {
   }
   return 0;
 }
+#endif
 
-long int get_way_len(int** matrix, int* way, int n) {
+long int get_way_len(int* matrix, int* way, int n) {
   int i = 0;
   int sum = 0;
   for (i = 1; i <= n; ++i) {
-    sum += matrix[way[i - 1]][way[i]];
+    sum += matrix[IND(way[i - 1], way[i], n)];
   }
   return sum;
 }
 
-int get_row_min(int** matrix, int n, int row, int greater_or_equal_zero) {
+int get_row_min(int* matrix, int n, int row, int greater_or_equal_zero) {
   int i = 0;
   int min = __INT32_MAX__;
   for (i = 0; i < n; ++i) {
-    if ((greater_or_equal_zero && matrix[row][i] > 0) ||
-        (!greater_or_equal_zero && matrix[row][i] >= 0)) {
-      if (matrix[row][i] < min) min = matrix[row][i];
+    if ((greater_or_equal_zero && matrix[IND(row, i, n)] > 0) ||
+        (!greater_or_equal_zero && matrix[IND(row, i, n)] >= 0)) {
+      if (matrix[IND(row, i, n)] < min) min = matrix[IND(row, i, n)];
     }
   }
   return min;
 }
 
-int get_col_min(int** matrix, int n, int col, int greater_or_equal_zero) {
+int get_col_min(int* matrix, int n, int col, int greater_or_equal_zero) {
   int i = 0;
   int min = __INT32_MAX__;
   for (i = 0; i < n; ++i) {
-    if ((greater_or_equal_zero && matrix[i][col] > 0) ||
-        (!greater_or_equal_zero && matrix[i][col] >= 0)) {
-      if (matrix[i][col] < min) min = matrix[i][col];
+    if ((greater_or_equal_zero && matrix[IND(i, col, n)] > 0) ||
+        (!greater_or_equal_zero && matrix[IND(i, col, n)] >= 0)) {
+      if (matrix[IND(i, col, n)] < min) min = matrix[IND(i, col, n)];
     }
   }
   return min;
@@ -106,6 +111,7 @@ int get_next_permutation(int* array, int start, int end) {
   return 0;
 }
 
+#if SAVE_INDEX == 1
 /* http://www.lib.tpu.ru/fulltext/v/Bulletin_TPU/2004/v307/i6/03.pdf */
 /* Или "Как получить лексикографическую перестановку по её индексу" */
 int get_permutation_by_index(int* array, int start, int end, long int index,
@@ -132,9 +138,10 @@ int get_permutation_by_index(int* array, int start, int end, long int index,
   }
   return 0;
 }
+#endif
 
 /* Метод полного перебора. Возвращает путь и индекс */
-int* brute_force(int** matrix, int n, long int* id) {
+int* brute_force(int* matrix, int n, long int* id) {
   int i = 0;
   int j = 0;
   /* Номер пути */
@@ -154,9 +161,6 @@ int* brute_force(int** matrix, int n, long int* id) {
    * Если указатель - NULL, тоже.
    */
   if (n <= 1 || !matrix) return NULL;
-
-  for (i = 0; i < n; ++i)
-    if (!matrix[i]) return NULL;
 
   /* Выделение памяти под массив хранения пути */
   way = (int*)malloc((n + 1) * sizeof(int));
@@ -209,15 +213,23 @@ int* brute_force(int** matrix, int n, long int* id) {
 #endif
     if (way_len < min_way_len) {
       min_way_len = way_len;
+#if SAVE_INDEX == 1
       min_way_index = way_index;
+#else
+      memcpy(res_way, way, (n + 1) * sizeof(int));
+#endif
     }
     ++way_index;
   } while (!get_next_permutation(way, 1, n - 1));
 
+#if SAVE_INDEX == 1
   if (get_permutation_by_index(start_way, 1, n - 1, min_way_index, res_way)) {
     return NULL;
   }
   *id = min_way_index;
+#else
+  *id = -1;
+#endif
 #if PRINT_WAYS == 1
   fprintf(logger, "Min Way %ld [ ", min_way_index);
   for (i = 0; i <= n; ++i) {
@@ -232,8 +244,316 @@ int* brute_force(int** matrix, int n, long int* id) {
   return res_way;
 }
 
+/* Редуцирование матрицы */
+int reduction_matrix(int* matrix, int n) {
+  int i = 0;
+  int j = 0;
+  /* Минимум по строкам */
+  int* alpha = NULL;
+  /* Минимум по столбцам */
+  int* beta = NULL;
+  /* Нижняя граница */
+  int low_border = 0;
+
+  alpha = (int*)malloc(n * sizeof(int));
+  beta = (int*)malloc(n * sizeof(int));
+
+  /* Не выделилась память */
+  if (!alpha || !beta) return -1;
+
+  /* Массив минимальных элементов в строке */
+  for (i = 0; i < n; ++i) {
+    alpha[i] = get_row_min(matrix, n, i, 0);
+    if (alpha[i] == __INT32_MAX__) alpha[i] = 0;
+  }
+
+  /* Вычитаем минимальный элемент строки из каждой строки */
+  for (i = 0; i < n; ++i) {
+    for (j = 0; j < n; ++j) {
+      if (matrix[IND(i, j, n)] >= 0)
+        matrix[IND(i, j, n)] = matrix[IND(i, j, n)] - alpha[i];
+    }
+  }
+
+  /* Массив минимальных элементов в столбце */
+  for (i = 0; i < n; ++i) {
+    beta[i] = get_col_min(matrix, n, i, 0);
+    if (beta[i] == __INT32_MAX__) beta[i] = 0;
+  }
+
+  /* Вычитаем минимальный элемент столбца из каждого столбца */
+  for (i = 0; i < n; ++i) {
+    for (j = 0; j < n; ++j) {
+      if (matrix[IND(i, j, n)] >= 0)
+        matrix[IND(i, j, n)] = matrix[IND(i, j, n)] - beta[j];
+    }
+  }
+
+  /* Считаем нижнюю границу */
+  for (i = 0; i < n; ++i) low_border = low_border + alpha[i] + beta[i];
+  return low_border;
+}
+
+/* Ищем замыкания в пути */
+int loop_check(int* way, int step, int n) {
+  int i = 0;
+  int j = 0;
+  int k = 0;
+  int start = 0;
+  int cursor = 0;
+  // printf("suspend\n");
+  // for (k = 0; k < step; ++k) {
+  // printf("%d %d\n", way[IND(k, 0, 2)], way[IND(k, 1, 2)]);
+  // }
+  // for (k = 0; k < n; ++k) {
+  k = 0;
+  start = k;
+  cursor = start;
+  for (i = 0; i < step; ++i) {
+    for (j = 0; j < step; ++j) {
+      if (cursor == way[IND(j, 0, 2)]) {
+        cursor = way[IND(j, 1, 2)];
+        ++k;
+        // printf("set cursor %d -> %d\n", way[IND(j, 0, 2)], way[IND(j, 1,
+        // 2)]);
+      }
+      if ((i > 0) & (cursor == start)) {
+        if (k == n) return 0;
+        return 1;
+      }
+    }
+  }
+  // }
+  return 0;
+}
+
+/* Рекурсия метода ветвей и границ */
+int* recursive_branch_and_bound(int* matrix, int size, int lb, int level,
+                                int step, int* way) {
+  int i = 0;
+  int j = 0;
+  int k = 0;
+  int col_min = __INT32_MAX__;
+  int row_min = __INT32_MAX__;
+  int rate_max = -255;
+  int rate_max_i = 0;
+  int rate_max_j = 0;
+  int* res = NULL;
+
+  /* Копируем размер матрицы*/
+  int n = size;
+  /* Нижняя граница */
+  int low_border = lb;
+  int lb_left = 0;
+  int lb_right = 0;
+
+  /* Копия исходной матрицы */
+  int* matrix_c = NULL;
+  /* Матрица оценок */
+  int* matrix_temp = NULL;
+  /* Матрицы ветвлений */
+  int* matrix_left = NULL;
+  int* matrix_right = NULL;
+
+  matrix_c = (int*)malloc(n * n * sizeof(int));
+  matrix_left = (int*)malloc(n * n * sizeof(int));
+  matrix_right = (int*)malloc(n * n * sizeof(int));
+  matrix_temp = (int*)malloc(n * n * sizeof(int));
+  /* Не выделилась память */
+  if (!matrix_c || !matrix_temp || !matrix_left || !matrix_right) return NULL;
+
+  /* Копируем матрицу */
+  for (i = 0; i < n; ++i) {
+    memcpy(matrix_c, matrix, n * n * sizeof(int));
+  }
+
+  if (level == 0) {
+    low_border = reduction_matrix(matrix_c, n);
+    if (low_border < 0) {
+      free(matrix_right);
+      free(matrix_left);
+      free(matrix_temp);
+      free(matrix_c);
+      return NULL;
+    }
+  }
+  /*
+   * TODO: Научить алгоритм исключать варианты, вызывающие замыкания путей при
+   * step < n
+   */
+  // if (step < n - 2) {
+  for (i = 0; i < n; ++i) {
+    for (j = 0; j < n; ++j) {
+      if (matrix_c[IND(i, j, n)] == 0) {
+        way[IND(step, 0, 2)] = i;
+        way[IND(step, 1, 2)] = j;
+        if (loop_check(way, step + 1, n)) {
+          // printf("LOOOOOOOP %d %d\n", i, j);
+          matrix_temp[IND(i, j, n)] = -255;
+        }
+        way[IND(step, 0, 2)] = -1;
+        way[IND(step, 1, 2)] = -1;
+      }
+    }
+  }
+  // }
+  /* Строим матрицу оценок */
+  for (i = 0; i < n; ++i) {
+    for (j = 0; j < n; ++j) {
+      if (matrix_c[IND(i, j, n)] == 0) {
+        col_min = __INT32_MAX__;
+        row_min = __INT32_MAX__;
+        for (k = 0; k < n; ++k) {
+          if ((j != k) && (matrix_c[IND(i, k, n)] >= 0) &&
+              (matrix_c[IND(i, k, n)] < row_min)) {
+            row_min = matrix_c[IND(i, k, n)];
+          }
+
+          if ((i != k) && (matrix_c[IND(k, j, n)] >= 0) &&
+              (matrix_c[IND(k, j, n)] < col_min)) {
+            col_min = matrix_c[IND(k, j, n)];
+          }
+        }
+        if (col_min == __INT32_MAX__) col_min = 0;
+        if (row_min == __INT32_MAX__) row_min = 0;
+        if (matrix_temp[IND(i, j, n)] >= 0) {
+          matrix_temp[IND(i, j, n)] = row_min + col_min;
+        }
+        if (matrix_temp[IND(i, j, n)] > rate_max) {
+          rate_max = matrix_temp[IND(i, j, n)];
+          rate_max_i = i;
+          rate_max_j = j;
+        }
+      } else {
+        matrix_temp[IND(i, j, n)] = 0;
+      }
+    }
+  }
+  if (rate_max_i == rate_max_j) {
+    // for (i = 0; i < level; ++i) fprintf(stderr, "\t");
+    // fprintf(stderr, "Rate/ub: [%d/%d] REJECT\n", rate_max_i, rate_max_j);
+    free(matrix_right);
+    free(matrix_left);
+    free(matrix_temp);
+    free(matrix_c);
+    return NULL;
+  }
+  if (step + 1 >= n) {
+    // fprintf(stdout, "!!!! %d %d\n", rate_max_i, rate_max_j);
+    way[IND(step, 0, 2)] = rate_max_i;
+    way[IND(step, 1, 2)] = rate_max_j;
+    free(matrix_right);
+    free(matrix_left);
+    free(matrix_temp);
+    free(matrix_c);
+    return matrix;
+  }
+
+  if (rate_max > lb) {
+    for (i = 0; i < level; ++i) fprintf(stderr, "\t");
+    // fprintf(stderr, "Rate/ub: [%d/%d] REJECT\n", rate_max, lb);
+    free(matrix_right);
+    free(matrix_left);
+    free(matrix_temp);
+    free(matrix_c);
+    return NULL;
+  }
+
+  /* Формирование матриц ветвлений */
+  /* Левая - включает путь */
+  for (i = 0; i < n; ++i) {
+    for (j = 0; j < n; ++j) {
+      if (i == rate_max_i || j == rate_max_j) {
+        matrix_left[IND(i, j, n)] = -255;
+      } else {
+        matrix_left[IND(i, j, n)] = matrix_c[IND(i, j, n)];
+      }
+    }
+  }
+
+  matrix_left[IND(rate_max_j, rate_max_i, n)] = -255;
+
+  /* Правая - исключает путь */
+  memcpy(matrix_right, matrix_c, n * n * sizeof(int));
+  matrix_right[IND(rate_max_i, rate_max_j, n)] = -255;
+  // matrix_right[IND(rate_max_j, rate_max_i, n)] = -255;
+
+  lb_left = reduction_matrix(matrix_left, n);
+  lb_right = reduction_matrix(matrix_right, n);
+
+  // for (i = 0; i < step; ++i) {
+  //   for (k = 0; k < level; ++k) fprintf(stdout, "\t");
+  //   fprintf(stdout, "%d %d\n", way[IND(i, 0, 2)], way[IND(i, 1, 2)]);
+  // }
+
+  // for (i = 0; i < n; ++i) {
+  //   for (k = 0; k < level; ++k) fprintf(stdout, "\t");
+  //   for (j = 0; j < n; ++j) fprintf(stdout, "%d\t", matrix_c[IND(i, j, n)]);
+  //   fprintf(stdout, "\n");
+  // }
+  // fprintf(stdout, "temp\n");
+  // for (i = 0; i < n; ++i) {
+  //   for (k = 0; k < level; ++k) fprintf(stdout, "\t");
+  //   for (j = 0; j < n; ++j) fprintf(stdout, "%d\t", matrix_temp[IND(i, j,
+  //   n)]); fprintf(stdout, "\n");
+  // }
+  // fprintf(stdout, "ri\n");
+  // for (i = 0; i < n; ++i) {
+  //   for (k = 0; k < level; ++k) fprintf(stdout, "\t");
+  //   for (j = 0; j < n; ++j) fprintf(stdout, "%d\t", matrix_right[IND(i, j,
+  //   n)]); fprintf(stdout, "\n");
+  // }
+  // fprintf(stdout, "le\n");
+  // for (i = 0; i < n; ++i) {
+  //   for (k = 0; k < level; ++k) fprintf(stdout, "\t");
+  //   for (j = 0; j < n; ++j) fprintf(stdout, "%d\t", matrix_left[IND(i, j,
+  //   n)]); fprintf(stdout, "\n");
+  // }
+  // fprintf(stdout, "\n");
+  // for (k = 0; k < level; ++k) fprintf(stdout, "\t");
+  // fprintf(stdout, "%d %d %d\n", low_border, lb_left, lb_right);
+  // fprintf(stdout, "!! %d %d\n", rate_max_i, rate_max_j);
+  // fprintf(stdout, "\n");
+  // fprintf(stdout, "\n");
+  if (lb_left <= lb_right) {
+    way[IND(step, 0, 2)] = rate_max_i;
+    way[IND(step, 1, 2)] = rate_max_j;
+    if (res = recursive_branch_and_bound(matrix_left, n, low_border + lb_left,
+                                         level + 1, step + 1, way)) {
+      // fprintf(stdout, "%d %d\n", rate_max_i, rate_max_j);
+    } else {
+      way[IND(step, 0, 2)] = -1;
+      way[IND(step, 1, 2)] = -1;
+      if (!recursive_branch_and_bound(matrix_right, n, low_border + lb_right,
+                                      level + 1, step, way)) {
+        fprintf(logger, "Fail\n");
+        return NULL;
+      }
+    }
+  } else {
+    if (!recursive_branch_and_bound(matrix_right, n, low_border + lb_right,
+                                    level + 1, step, way)) {
+      way[IND(step, 0, 2)] = rate_max_i;
+      way[IND(step, 1, 2)] = rate_max_j;
+      if (res = recursive_branch_and_bound(matrix_left, n, low_border + lb_left,
+                                           level + 1, step + 1, way)) {
+        // fprintf(stdout, "%d %d\n", rate_max_i, rate_max_j);
+      } else {
+        
+        fprintf(logger, "Fail\n");
+        return NULL;
+      }
+    }
+  }
+  free(matrix_right);
+  free(matrix_left);
+  free(matrix_temp);
+  free(matrix_c);
+  return matrix;
+}
+
 /* Метод ветвей и границ */
-int* branch_and_bound(int** matrix, int size) {
+int* branch_and_bound(int* matrix, int size) {
   int i = 0;
   int j = 0;
   int k = 0;
@@ -246,17 +566,24 @@ int* branch_and_bound(int** matrix, int size) {
   int ways_index = 0;
   /* Нижняя граница */
   int low_border = 0;
+  /* Верхняя граница */
+  int up_border = 0;
 
   /* Копия исходной матрицы */
-  int** matrix_c = NULL;
+  int* matrix_c = NULL;
   /* Матрица оценок */
-  int** matrix_temp = NULL;
+  int* matrix_temp = NULL;
   /* Матрица путей src->dst */
   int** ways = NULL;
   /* Минимум по строкам */
   int* alpha = NULL;
   /* Минимум по столбцам */
   int* beta = NULL;
+
+  /* Путь */
+  int* way = NULL;
+  int* start_way = NULL;
+  int* res_way = NULL;
 
   /*
    * Если размерность матрицы меньше или 1 - ошибка.
@@ -265,131 +592,42 @@ int* branch_and_bound(int** matrix, int size) {
    */
   if (n <= 1 || !matrix) return NULL;
 
-  /* Выделение памяти под матрицу и вектора */
-  matrix_c = (int**)malloc(n * sizeof(int*));
-  matrix_temp = (int**)calloc(n, sizeof(int*));
-  ways = (int**)calloc(n, sizeof(int*));
-
-  alpha = (int*)malloc(n * sizeof(int));
-  beta = (int*)malloc(n * sizeof(int));
+  /* Выделение памяти под массив хранения пути */
+  start_way = (int*)malloc((n + 1) * sizeof(int));
+  res_way = (int*)calloc((n + 1), sizeof(int));
+  way = (int*)calloc(2 * n, sizeof(int));
 
   /* Не выделилась память */
-  if (!matrix_c || !alpha || !beta || !matrix_temp || !ways) return NULL;
+  if (!start_way || !res_way || !way) return NULL;
 
-  for (i = 0; i < n; ++i) {
-    matrix_c[i] = (int*)malloc(n * sizeof(int));
-    /* Не выделилась память */
-    if (!matrix_c[i]) {
-      for (j = 0; j < i; ++j) free(matrix_c[j]);
-      free(matrix_c);
-      return NULL;
-    }
+  for (i = 0; i <= n; ++i) {
+    start_way[i] = i % n;
   }
-
-  for (i = 0; i < n; ++i) {
-    matrix_temp[i] = (int*)calloc(n, sizeof(int));
-    /* Не выделилась память */
-    if (!matrix_temp[i]) {
-      for (j = 0; j < i; ++j) free(matrix_temp[j]);
-      free(matrix_temp);
-      return NULL;
-    }
+  /* Считаем верхнюю границу */
+  up_border = 0;
+  up_border = get_way_len(matrix, start_way, size);
+  if (!recursive_branch_and_bound(matrix, n, up_border, 0, 0, way)) {
+    return NULL;
   }
-
-  for (i = 0; i < n; ++i) {
-    ways[i] = (int*)calloc(2, sizeof(int));
-    /* Не выделилась память */
-    if (!ways[i]) {
-      for (j = 0; j < i; ++j) free(ways[j]);
-      free(ways);
-      return NULL;
-    }
-  }
-
-  /* Копируем матрицу. Из-за специфики хранения - построчно */
-  for (i = 0; i < n; ++i) {
-    memcpy(matrix_c[i], matrix[i], n * sizeof(int));
-  }
-
-  low_border = 0;
-  /* Массив минимальных элементов в строке */
-  for (i = 0; i < n; ++i) {
-    alpha[i] = get_row_min(matrix_c, n, i, 0);
-  }
-
-  /* Вычитаем минимальный элемент строки из каждой строки */
-  for (i = 0; i < n; ++i) {
+  // for (j = 0; j < n; ++j) {
+  // printf("! %d %d\n", way[IND(j, 0, 2)], way[IND(j, 1, 2)]);
+  // }
+  for (i = 1; i < n; ++i) {
     for (j = 0; j < n; ++j) {
-      if (j != i) matrix_c[i][j] = matrix_c[i][j] - alpha[i];
-    }
-  }
-
-  /* Массив минимальных элементов в столбце */
-  for (i = 0; i < n; ++i) {
-    beta[i] = get_col_min(matrix_c, n, i, 0);
-  }
-
-  /* Вычитаем минимальный элемент столбца из каждого столбца */
-  for (i = 0; i < n; ++i) {
-    for (j = 0; j < n; ++j) {
-      if (j != i) matrix_c[i][j] = matrix_c[i][j] - beta[j];
-    }
-  }
-
-  /* Считаем нижнюю границу */
-  for (i = 0; i < n; ++i) low_border = low_border + alpha[i] + beta[i];
-  /* Строим матрицу оценок */
-  for (i = 0; i < n; ++i) {
-    for (j = 0; j < n; ++j) {
-      if (matrix_c[i][j] == 0) {
-        for (k = 0; k < n; ++k) {
-          if ((j != k) && (matrix_c[i][k] >= 0) && (matrix_c[i][k] < row_min))
-            row_min = matrix_c[i][k];
+      if (i == 1) {
+        if (start_way[0] == way[IND(j, 0, 2)]) {
+          res_way[0] = way[IND(j, 0, 2)];
+          res_way[n] = way[IND(j, 0, 2)];
+          res_way[1] = way[IND(j, 1, 2)];
         }
-        for (k = 0; k < n; ++k) {
-          if ((i != k) && (matrix_c[k][j] >= 0) && (matrix_c[k][j] < col_min))
-            col_min = matrix_c[k][j];
-        }
-        matrix_temp[i][j] = row_min + col_min;
       } else {
-        matrix_temp[i][j] = 0;
+        if (res_way[i - 1] == way[IND(j, 0, 2)]) {
+          res_way[i] = way[IND(j, 1, 2)];
+        }
       }
     }
   }
-
-  /* Печать матрицы, alpha, beta, lb */
-  for (i = 0; i < n; ++i) {
-    for (j = 0; j < n; ++j) fprintf(stderr, "%d\t", matrix_c[i][j]);
-    fprintf(stderr, "\n");
-  }
-  fprintf(stderr, "\n");
-  for (i = 0; i < n; ++i) {
-    for (j = 0; j < n; ++j) fprintf(stderr, "%d\t", matrix_temp[i][j]);
-    fprintf(stderr, "\n");
-  }
-  fprintf(logger, "alpha [ ");
-  for (i = 0; i < n; ++i) {
-    fprintf(logger, "%d ", alpha[i]);
-  }
-  fprintf(stderr, "]\n");
-  fprintf(logger, "beta [ ");
-  for (i = 0; i < n; ++i) {
-    fprintf(logger, "%d ", beta[i]);
-  }
-  fprintf(logger, "]\n");
-  fprintf(logger, "lb : %d\n", low_border);
-
-  free(alpha);
-  free(beta);
-  for (i = 0; i < n; ++i) {
-    free(matrix_c[i]);
-  }
-  free(matrix_c);
-  for (i = 0; i < n; ++i) {
-    free(matrix_temp[i]);
-  }
-  free(matrix_temp);
-  return NULL;
+  return res_way;
 }
 
 int main(int argc, char** argv) {
@@ -409,8 +647,9 @@ int main(int argc, char** argv) {
   if (argv[2]) filename = argv[2];
 
   /* Матрица */
-  int** matrix = NULL;
-  int* brute_way = NULL;
+  int* matrix = NULL;
+  int* brute_force_way = NULL;
+  int* branch_and_bound_way = NULL;
 
 /* Инициализация логгера */
 #if LOG_FILE == 1
@@ -422,60 +661,64 @@ int main(int argc, char** argv) {
 #endif
 
   /* Выделение памяти под матрицу */
-  matrix = (int**)malloc(n * sizeof(int*));
+  matrix = (int*)malloc(n * n * sizeof(int));
   /* Не выделилась память */
   if (!matrix) return 255;
-
-  for (i = 0; i < n; ++i) {
-    matrix[i] = (int*)malloc(n * sizeof(int));
-    /* Не выделилась память */
-    if (!matrix[i]) {
-      for (j = 0; j < i; ++j) free(matrix[j]);
-      free(matrix);
-      return 254;
-    }
-  }
 
   /* Чтение из файла */
   /* Ошибка открытия файла */
   if (!(fd = fopen(filename, "r"))) {
+    free(matrix);
     return 253;
   }
 
   /* Читаем матрицу */
   for (i = 0; i < n; ++i) {
     for (j = 0; j < n; ++j) {
-      fscanf(fd, "%d", &matrix[i][j]);
+      fscanf(fd, "%d", &matrix[IND(i, j, n)]);
     }
   }
 
   /* Печать матрицы */
   for (i = 0; i < n; ++i) {
-    for (j = 0; j < n; ++j) fprintf(stderr, "%d\t", matrix[i][j]);
-    fprintf(stderr, "\n");
+    for (j = 0; j < n; ++j) fprintf(stdout, "%d\t", matrix[IND(i, j, n)]);
+    fprintf(stdout, "\n");
   }
   time = wtime();
-  brute_way = brute_force(matrix, n, &way_index);
+  brute_force_way = brute_force(matrix, n, &way_index);
   time = wtime() - time;
-  if (!brute_way) {
+  if (!brute_force_way) {
+    free(brute_force_way);
     return 252;
   }
 
-  fprintf(stderr, "Res brute Min Way %ld [ ", way_index);
+  fprintf(stdout, "Res brute force Min Way %ld [ ", way_index);
   for (i = 0; i <= n; ++i) {
-    fprintf(stderr, "%d ", brute_way[i]);
+    fprintf(stdout, "%d ", brute_force_way[i]);
   }
-  fprintf(stderr, "]\n");
-  fprintf(stderr, "Res brute Way Len : %ld", get_way_len(matrix, brute_way, n));
-  fprintf(stderr, "\n");
-  fprintf(stderr, "Brute time : %lf\n", time);
-  free(brute_way);
+  fprintf(stdout, "]\n");
+  fprintf(stdout, "Res brute force Way Len : %ld\n",
+          get_way_len(matrix, brute_force_way, n));
+  fprintf(stdout, "Brute force time : %lf\n", time);
+  free(brute_force_way);
 
-  branch_and_bound(matrix, n);
-
-  for (i = 0; i < n; ++i) {
-    free(matrix[i]);
+  time = wtime();
+  branch_and_bound_way = branch_and_bound(matrix, n);
+  time = wtime() - time;
+  if (!branch_and_bound_way) {
+    free(branch_and_bound_way);
+    return 251;
   }
+  fprintf(stdout, "Res branch and bound Min Way [ ");
+  for (i = 0; i <= n; ++i) {
+    fprintf(stdout, "%d ", branch_and_bound_way[i]);
+  }
+  fprintf(stdout, "]\n");
+  fprintf(stdout, "Res branch and bound Way Len : %ld\n",
+          get_way_len(matrix, branch_and_bound_way, n));
+  fprintf(stdout, "Branch and bound time : %lf\n", time);
+
+  free(branch_and_bound_way);
   free(matrix);
   return 0;
 }

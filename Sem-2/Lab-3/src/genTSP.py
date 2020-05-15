@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-filePath = "data/graph_10v.dat"		# Output file for generated graph
-citiesNum = 10						# Amount of cities (vertices) to generate paths among them
+filePath = "data/graph_8v.dat"		# Output file for generated graph
+citiesNum = 8						# Amount of cities (vertices) to generate paths among them
 isCon = 100							# Probability to generate a connection between two cities.
 									# The higher this variable then more variants for
 									# TSP will be calculated

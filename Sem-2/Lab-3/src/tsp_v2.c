@@ -463,7 +463,7 @@ int* recursive_branch_and_bound(int* matrix, int size, int lb, int level,
       way[IND(step, 1, 2)] = -1;
       if (!recursive_branch_and_bound(matrix_right, n, low_border + lb_right,
                                       level + 1, step, way)) {
-        fprintf(logger, "Fail\n");
+        // fprintf(logger, "Fail\n");
         return NULL;
       }
     }
@@ -474,7 +474,7 @@ int* recursive_branch_and_bound(int* matrix, int size, int lb, int level,
       way[IND(step, 1, 2)] = rate_max_j;
       if (!recursive_branch_and_bound(matrix_left, n, low_border + lb_left,
                                            level + 1, step + 1, way)) {
-        fprintf(logger, "Fail\n");
+        // fprintf(logger, "Fail\n");
         return NULL;
       }
     }

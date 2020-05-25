@@ -2,11 +2,18 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/time.h>
-#include <time.h>
 #include <inttypes.h>
+#include <math.h>
+#include <time.h>
 
 const double PI = 3.14159265358979323846;
 const int n = 10000000;
+
+double wtime() {
+    struct timeval t;
+    gettimeofday(&t, NULL);
+    return (double)t.tv_sec + (double)t.tv_usec * 1E-6;
+}
 
 double getrand() {
   return (double)rand() / RAND_MAX;
@@ -19,7 +26,8 @@ double func(double x, double y) {
 int main(int argc, char **argv) {
   int in = 0;
   double s = 0;
-  double t = omp_get_wtime();
+  double t = wtime();
+
   for (int i = 0; i < n; i++) {
     double x = getrand() * PI;
     double y = getrand();
@@ -28,11 +36,11 @@ int main(int argc, char **argv) {
       s += func(x, y);
     }
   }
-  t = omp_get_wtime() - t;
+
+  t = wtime() - t;
   double v = PI * in / n;
   double res = v * s / in;
-  /* x in [0, pi] */
-  /* y in [0, sin(x)] */
+
   printf("Result: %.12f, n %d\ntime = %.6lf\n", res, n, t);
   return EXIT_SUCCESS;
 }

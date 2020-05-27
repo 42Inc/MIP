@@ -24,16 +24,16 @@ int main(int argc, char **argv) {
   double s = 0;
   double distance = 4;
   double length = 2;
-
+  srand(time(NULL));
   for (i = 0; i < n; ++i) {
-    double x = getrand() * 2 * distance;
-    double alpha = getrand();
-    // if (length * sin(alpha) < x) {
-    if (x <= length * cos(alpha)) {
+    double x = getrand() * distance;
+    double alpha = getrand() * PI;
+
+    if (x <= length * sin(alpha)) {
       ++in;
     }
   }
-  
+
   double theor = 2 * length / (distance * PI);
   double pract = (double)(in) / n;
   double res = fabs(theor - pract) / theor;

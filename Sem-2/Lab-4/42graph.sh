@@ -10,6 +10,7 @@ set key top left
 set grid
 set mytics
 set mxtics
+set yrange [0:1]
 set format y "%.6f"
 set xlabel "Amount of throws" font "Arial, 16"
 set format x "%.0f"

@@ -1,14 +1,13 @@
 CC := gcc
-STD := -std=c99 -lm
+STD := -std=c99
 DEBUG := -g3
 OBJ_PATH := ./obj
 SRC_PATH := ./src
 BIN_PATH = ./bin
 DATA_PATH = ./data
 INC_PATH = ./include
-SOURCES=needleThrow.c
-OBJECTS=$(SOURCES:.c=.o)
-EXECUTABLE=hello
+SOURCES=$(wildcard $(SRC_PATH)/*.c)
+OBJECTS=$(patsubst $(SRC_PATH)%, $(OBJ_PATH)%, $(SOURCES:.c=.o))
 
 .PHONY: all cmpl
 
@@ -26,10 +25,10 @@ $(DATA_PATH):
 	$(if ifeq test -d "$(DATA_PATH)" 0, @mkdir -p $(DATA_PATH))
 
 cmpl: $(OBJECTS)
-	$(CC) $(STD) $(DEBUG) $(OBJ_PATH)/$< -o $(BIN_PATH)/$@
+	$(CC) $(STD) $(DEBUG) $< -o $(BIN_PATH)/$@ -lm
 
-needleThrow.o:
-	$(CC) $(STD) $(DEBUG) -c $(SRC_PATH)/$*.c -o $(OBJ_PATH)/$@
+$(OBJ_PATH)/%.o: $(SRC_PATH)/%.c
+	$(CC) $(STD) $(DEBUG) -c $^ -o $@ -lm
 
 clean:
 	rm -rf $(OBJ_PATH) $(BIN_PATH)
